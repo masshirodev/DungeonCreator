@@ -1,0 +1,6 @@
+[Module]
+Name=DungeonCreator
+Dependencies=minionlib,MashLib
+Version=1
+Files=dungeoncreator.lua
+enabled=1
