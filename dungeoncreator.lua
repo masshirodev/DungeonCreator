@@ -892,8 +892,16 @@ function DungeonCreator.MainWindow()
                                         
                                                             local GetInteraction = GUI:Button([[Get target##GetInteraction]], 100, 19)
 
-                                                            if GUI:IsItemClicked(RemoveInteraction) then 
-                                                                DungeonCreator.CurrentFile.interacts[k].contentId = Player:GetTarget().contentId
+                                                            if GUI:IsItemClicked(GetInteraction) then
+								--d("is clicked, current content id is "..Player:GetTarget().contentId)
+                                                                --DungeonCreator.CurrentFile.interacts[k].contentId = Player:GetTarget().contentId
+								--d("DungeonCreator.CurrentFile.interacts[k].contentId is now"..DungeonCreator.CurrentFile.interacts[k].contentId)
+								local index = #DungeonCreator.CurrentFile.interacts+0
+								DungeonCreator.CurrentFile.interacts[index] = {
+									contentid = Player:GetTarget().contentId,
+									priority = 1,
+									type = Player:GetTarget().name
+								}	
                                                             end
 
                                                             GUI:SameLine()
