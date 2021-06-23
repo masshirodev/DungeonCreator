@@ -574,7 +574,7 @@ function DungeonCreator.MainWindow()
                                                             GUI:NextColumn()
                                                             GUI:SetColumnWidth(-1, 400)
 
-                                                                local ObjectiveGoToPos = GUI:Button([[Go to pos##ObjectiveGetPos]], 100, 19)
+                                                                local ObjectiveGoToPos = GUI:Button([[Go to pos##ObjectiveGoToPos]], 100, 19)
                                                                 
                                                                 if GUI:IsItemClicked(ObjectiveGoToPos) then 
                                                                     if DungeonCreator.CurrentFile.objectivedestinations[k].pos then
@@ -584,19 +584,19 @@ function DungeonCreator.MainWindow()
 
                                                                 GUI:SameLine()
 
-                                                                local ObjectiveGetPos = GUI:Button([[Get ppos##ObjectiveGetPos]], 75, 19)
+--                                                                 local ObjectiveGetPos = GUI:Button([[Get ppos##ObjectiveGetPos]], 75, 19)
 
-                                                                if GUI:IsItemClicked(ObjectiveGetPos) then 
-                                                                    DungeonCreator.CurrentFile.objectivedestinations[k].pos = {
-                                                                        x = MashLib.Helpers.ToFixed(Player.pos.x, 2),
-                                                                        y = MashLib.Helpers.ToFixed(Player.pos.y, 2),
-                                                                        z = MashLib.Helpers.ToFixed(Player.pos.z, 2)
-                                                                    }
-                                                                end
+--                                                                 if GUI:IsItemClicked(ObjectiveGetPos) then 
+--                                                                     DungeonCreator.CurrentFile.objectivedestinations[k].pos = {
+--                                                                         x = MashLib.Helpers.ToFixed(Player.pos.x, 2),
+--                                                                         y = MashLib.Helpers.ToFixed(Player.pos.y, 2),
+--                                                                         z = MashLib.Helpers.ToFixed(Player.pos.z, 2)
+--                                                                     }
+--                                                                 end
 
-                                                                GUI:SameLine()
+--                                                                 GUI:SameLine()
                                                                 
-                                                                local ObjectiveGetTargetPos = GUI:Button([[Get tpos##ObjectiveGetTargetPos]], 75, 19)
+                                                                local ObjectiveGetTargetPos = GUI:Button([[Target or Me##ObjectiveGetTargetPos]], 150, 19)
                                                                 
                                                                 if GUI:IsItemClicked(ObjectiveGetTargetPos) then
                                                                     if Player:GetTarget() then
