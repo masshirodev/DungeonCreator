@@ -65,6 +65,7 @@ function DungeonCreator.FormatFileToFramework(File)
     NewFile.interacts               = {}
     NewFile.objectivedestinations   = {}
     NewFile.prioritytarget          = {}
+    NewFile.hasbuff                 = {}
 
 -- ------------------------- Interactions ------------------------
 
@@ -97,6 +98,37 @@ function DungeonCreator.FormatFileToFramework(File)
             priority    = tonumber(v.priority),
             type        = v.type
         }
+    end
+
+-- ------------------------- HasBuff ------------------------
+
+    for k, v in pairs(File.hasbuff) do
+        if v.type == 'interact' then
+            NewFile.hasbuff[#NewFile.hasbuff+1] = {
+                type            = "interact",
+                interactid      = v.interactid,
+                buffid          = tonumber(v.buffid),
+                stacksrequired  = tonumber(v.stacksrequired),
+                desc            = v.desc
+            }
+        elseif v.type == 'move' then
+            local index = #NewFile.hasbuff+1
+
+            NewFile.hasbuff[index] = {
+                type            = "move",
+                buffid          = tonumber(v.buffid),
+                desc            = v.desc,
+                pos             = {}
+            }
+
+            for _, vp in pairs(v.pos) do 
+                NewFile.hasbuff[index].pos[#NewFile.hasbuff[index].pos+1] = {
+                    x = vp.x + 0.0,
+                    y = vp.y + 0.0,
+                    z = vp.z + 0.0
+                }
+            end
+        end
     end
 
     return NewFile
@@ -141,7 +173,7 @@ function DungeonCreator.MainWindow()
                         GUI:PopItemWidth()
 
                     GUI:NextColumn()
-                    GUI:SetColumnWidth(-1, 200)
+                    GUI:SetColumnWidth(-1, 350)
 
     -- ------------------------- Save Profile ------------------------
 
@@ -151,7 +183,7 @@ function DungeonCreator.MainWindow()
                             local FilePath = DungeonCreator.ProfilePath .. DungeonCreator.ProfileList[DungeonCreator.GUI.Combos.Profile]
 
                             if FileExists(FilePath) then
-                                local File = DungeonCreator.FormatFileToFramework(DungeonCreator.CurrentFile)
+                                local File = MashLib.IRT.FormatFileToFramework(DungeonCreator.CurrentFile)
                                 FileSave(FilePath, File)
                             end
                         end
@@ -220,6 +252,59 @@ function DungeonCreator.MainWindow()
 
                         GUI:SameLine()
 
+    -- ------------------------- Open Folder ------------------------
+
+                        -- local OpenProfileFolder = GUI:Button([[Open Folder##OpenProfileFolder]], 90, 19)
+
+                        -- if GUI:IsItemClicked(OpenProfileFolder) then 
+                        --     MashLib.Powershell.Execute([[ii ]] .. DungeonCreator.ProfilePath)
+                        -- end
+
+                        -- if GUI:IsItemHovered(DeleteProfile) then
+                        --     GUI:BeginTooltip()
+                        --         GUI:Text([[Open profiles folder.]])
+                        --     GUI:EndTooltip()
+                        -- end
+
+                        GUI:SameLine()
+                            -- Tehe xD
+                            GUI:Text(" ")
+                        GUI:SameLine()
+                        
+    -- ------------------------- Discord ------------------------
+
+                        if FileExists(MashLib.MediaPath .. [[discord.png]]) then
+                            local DiscordBtn = GUI:ImageButton([[DiscordBtn]], MashLib.MediaPath .. [[discord.png]], 20, 20, -1, -1, 0, 0, 0)
+
+                            if GUI:IsItemHovered(DiscordBtn) then
+                                GUI:BeginTooltip()
+                                    GUI:Text([[Kitanoi's Discord Server]])
+                                GUI:EndTooltip()
+                            end
+
+                            if GUI:IsItemClicked(DiscordBtn) then
+                                MashLib.Powershell.OpenLink(MashLib.Info.Discord)
+                            end
+                        end
+
+                        GUI:SameLine()
+                            GUI:Text(" ")
+                        GUI:SameLine()
+
+    -- ------------------------- Patreon ------------------------
+
+                        local PatreonBtn = GUI:ImageButton([[PatreonBtn]], MashLib.MediaPath .. [[patreon.png]], 20, 20, -1, -1, 0, 0, 0)
+
+                        if GUI:IsItemHovered(PatreonBtn) then
+                            GUI:BeginTooltip()
+                                GUI:Text([[Consider becoming a patron!]])
+                            GUI:EndTooltip()
+                        end
+
+                        if GUI:IsItemClicked(PatreonBtn) then
+                            MashLib.Powershell.OpenLink(MashLib.Info.Patreon)
+                        end
+
                     GUI:Columns(1)
                 MashLib.UI.PopTitledChild()
 
@@ -241,7 +326,7 @@ function DungeonCreator.MainWindow()
                                     mesh = "",
                                     queuetype = 2,
                                     prioritytarget = {},
-                                    enemytargetdistance = 15,
+                                    enemytargetdistance = 30,
                                     objectivedestinations = {},	
                                     bossids = {},
                                     interacts = {}
@@ -265,9 +350,81 @@ function DungeonCreator.MainWindow()
                     MashLib.UI.PopTitledChild()
                 else
 
+    -- ------------------------- Settings ------------------------
+
+                MashLib.UI.BeginTitledChild([[ProfileSettings]], [[Settings]], 740, 160, 0)
+                GUI:Indent()
+                    GUI:Columns(2, [[]], false)
+                    GUI:SetColumnWidth(-1, 200)
+                        GUI:Text([[Profile Name]])
+                    GUI:NextColumn()
+                    GUI:SetColumnWidth(-1, 600)
+                        GUI:PushItemWidth(500)
+                            GUI:InputText([[##FileName]], DungeonCreator.ProfileList[DungeonCreator.GUI.Combos.Profile], (GUI.InputTextFlags_ReadOnly))
+                        GUI:PopItemWidth()
+                    GUI:NextColumn()
+                        GUI:Text([[Dungeon Name]])
+                    GUI:NextColumn()
+                        GUI:PushItemWidth(500)
+                            DungeonCreator.CurrentFile.name = GUI:InputText([[##FileDungeonName]], DungeonCreator.CurrentFile.name)
+                        GUI:PopItemWidth()
+                    GUI:NextColumn()
+                        GUI:Text([[Queue Type]])
+                    GUI:NextColumn()
+                        local QueueTypes = {
+                            [1] = "Synced",
+                            [2] = "Unsynced"
+                        }
+                        
+                        GUI:PushItemWidth(100)
+                            DungeonCreator.CurrentFile.queuetype, _ = GUI:Combo([[##FileQueueType]], DungeonCreator.CurrentFile.queuetype, QueueTypes)
+                        GUI:PopItemWidth()
+                    GUI:NextColumn()
+                        GUI:Text([[Duty ID]])
+                    GUI:NextColumn()
+
+                        local SetCurrentMapId = GUI:Button([[Get Current##SetCurrentMapId]], 120, 19)
+
+                        if GUI:IsItemClicked(SetCurrentMapId) then 
+                            DungeonCreator.CurrentFile.dutyid = Player.localmapid
+                        end
+
+                        GUI:SameLine()
+
+                        GUI:PushItemWidth(50)
+                            DungeonCreator.CurrentFile.dutyid = GUI:InputText([[##FileDutyId]], DungeonCreator.CurrentFile.dutyid)
+                        GUI:PopItemWidth()
+                    GUI:NextColumn()
+                        GUI:Text([[Mesh]])
+                    GUI:NextColumn()
+                        GUI:PushItemWidth(300)
+
+                            local SetCurrentMapMeshName = GUI:Button([[Get Current##SetCurrentMapMeshName]], 120, 19)
+
+                            if GUI:IsItemClicked(SetCurrentMapMeshName) then 
+                                DungeonCreator.CurrentFile.mesh = ml_mesh_mgr.currentfilename
+                            end
+
+                            GUI:SameLine()
+
+                            DungeonCreator.CurrentFile.mesh = GUI:InputText([[##FileMesh]], DungeonCreator.CurrentFile.mesh)
+                            
+                        GUI:PopItemWidth()
+                    GUI:NextColumn()
+                        GUI:Text([[Enemy Target Distance]])
+                    GUI:NextColumn()
+                        GUI:PushItemWidth(50)
+                            DungeonCreator.CurrentFile.enemytargetdistance = GUI:InputText([[##FileEnemyTargetDistance]], DungeonCreator.CurrentFile.enemytargetdistance)
+                        GUI:PopItemWidth()
+                    GUI:Columns(1)
+                GUI:Unindent()
+                MashLib.UI.PopTitledChild()
+
+                GUI:NewLine()
+
     -- ------------------------- Profile Body ------------------------
 
-                    GUI:BeginChild("##Body", 745, 710, true)
+                    GUI:BeginChild("##Body", 743, 530, true)
                         if not DungeonCreator.ProfileList[DungeonCreator.GUI.Combos.Profile] then
                             GUI:Text("Select a profile above <3")
                         else
@@ -279,662 +436,621 @@ function DungeonCreator.MainWindow()
 
                             DungeonCreator.CurrentFile = DungeonCreator.ProfileLoaded[DungeonCreator.GUI.Combos.Profile]
                             
-    -- ------------------------- Settings ------------------------
-
-                            MashLib.UI.BeginTitledChild([[ProfileSettings]], [[Settings]], 715, 160, 0)
-                                GUI:Indent()
-                                    GUI:Columns(2, [[]], false)
-                                    GUI:SetColumnWidth(-1, 200)
-                                        GUI:Text([[Profile Name]])
-                                    GUI:NextColumn()
-                                    GUI:SetColumnWidth(-1, 600)
-                                        GUI:PushItemWidth(500)
-                                            GUI:InputText([[##FileName]], DungeonCreator.ProfileList[DungeonCreator.GUI.Combos.Profile], (GUI.InputTextFlags_ReadOnly))
-                                        GUI:PopItemWidth()
-                                    GUI:NextColumn()
-                                        GUI:Text([[Dungeon Name]])
-                                    GUI:NextColumn()
-                                        GUI:PushItemWidth(500)
-                                            DungeonCreator.CurrentFile.name = GUI:InputText([[##FileDungeonName]], DungeonCreator.CurrentFile.name)
-                                        GUI:PopItemWidth()
-                                    GUI:NextColumn()
-                                        GUI:Text([[Duty ID]])
-                                    GUI:NextColumn()
-                                        GUI:PushItemWidth(50)
-                                            DungeonCreator.CurrentFile.dutyid = GUI:InputText([[##FileDutyId]], DungeonCreator.CurrentFile.dutyid)
-                                        GUI:PopItemWidth()
-
-                                        GUI:SameLine()
-
-                                        local SetCurrentMapId = GUI:Button([[Get Current##SetCurrentMapId]], 150, 19)
-
-                                        if GUI:IsItemClicked(SetCurrentMapId) then 
-                                            DungeonCreator.CurrentFile.dutyid = Player.localmapid
-                                        end
-                                    GUI:NextColumn()
-                                        GUI:Text([[Queue Type]])
-                                    GUI:NextColumn()
-                                        local QueueTypes = {
-                                            [1] = "Synced",
-                                            [2] = "Unsynced"
-                                        }
-                                        
-                                        GUI:PushItemWidth(100)
-                                            DungeonCreator.CurrentFile.queuetype, _ = GUI:Combo([[##FileQueueType]], DungeonCreator.CurrentFile.queuetype, QueueTypes)
-                                        GUI:PopItemWidth()
-                                    GUI:NextColumn()
-                                        GUI:Text([[Mesh]])
-                                    GUI:NextColumn()
-                                        GUI:PushItemWidth(500)
-                                            DungeonCreator.CurrentFile.mesh = GUI:InputText([[##FileMesh]], DungeonCreator.CurrentFile.mesh)
-                                        GUI:PopItemWidth()
-                                    GUI:NextColumn()
-                                        GUI:Text([[Enemy Target Distance]])
-                                    GUI:NextColumn()
-                                        GUI:PushItemWidth(50)
-                                            DungeonCreator.CurrentFile.enemytargetdistance = GUI:InputText([[##FileEnemyTargetDistance]], DungeonCreator.CurrentFile.enemytargetdistance)
-                                        GUI:PopItemWidth()
-                                    GUI:Columns(1)
-                                GUI:Unindent()
-                            MashLib.UI.PopTitledChild()
-                            
-                            GUI:NewLine()
-                            
     -- ------------------------- Objectives ------------------------
 
-                            if DungeonCreator.CurrentFile.objectivedestinations then
-                                MashLib.UI.BeginTitledChild([[ProfileObjectives]], [[Objectives]], 715, 200, 0)
-                                    GUI:Indent()
+                            if (GUI:CollapsingHeader(GetString("Objectives"))) then
+                                if DungeonCreator.CurrentFile.objectivedestinations then
+                                    MashLib.UI.BeginTitledChild([[ProfileObjectives]], [[Objectives]], 715, 200, 0)
+                                        GUI:Indent()
 
-                                        GUI:BeginChild([[##ObjectivesButtons]], 695, 30)
-                                        
-                                            local AddObjective = GUI:Button([[Add##AddObjective]], 50, 19)
+                                            GUI:BeginChild([[##ObjectivesButtons]], 695, 30)
+                                            
+                                                local AddObjective = GUI:Button([[Add##AddObjective]], 50, 19)
 
-                                            if GUI:IsItemClicked(AddObjective) then 
-                                                local index = #DungeonCreator.CurrentFile.objectivedestinations+1
+                                                if GUI:IsItemClicked(AddObjective) then 
+                                                    local index = #DungeonCreator.CurrentFile.objectivedestinations+1
 
-                                                DungeonCreator.CurrentFile.objectivedestinations[index] = {
-                                                    objective = index,
-                                                    pos = {
-                                                        x = MashLib.Helpers.ToFixed(Player.pos.x, 2),
-                                                        y = MashLib.Helpers.ToFixed(Player.pos.y, 2),
-                                                        z = MashLib.Helpers.ToFixed(Player.pos.z, 2)
+                                                    DungeonCreator.CurrentFile.objectivedestinations[index] = {
+                                                        objective = index,
+                                                        pos = {
+                                                            x = MashLib.Helpers.ToFixed(Player.pos.x, 2),
+                                                            y = MashLib.Helpers.ToFixed(Player.pos.y, 2),
+                                                            z = MashLib.Helpers.ToFixed(Player.pos.z, 2)
+                                                        }
                                                     }
-                                                }
-                                            end
-
-                                            GUI:SameLine()
-
-                                            local ClearObjectives = GUI:Button([[Clear##ClearObjectives]], 50, 19)
-
-                                            if GUI:IsItemClicked(ClearObjectives) then 
-                                                DungeonCreator.CurrentFile.objectivedestinations = {}
-                                            end
-
-                                        GUI:EndChild()
-
-                                        GUI:Columns(5, [[]], false)
-                                        GUI:SetColumnWidth(-1, 100)
-                                            GUI:Text([[Order]])
-                                        GUI:NextColumn()
-                                        GUI:SetColumnWidth(-1, 100)
-                                            GUI:Text([[PosX]])
-                                        GUI:NextColumn()
-                                        GUI:SetColumnWidth(-1, 100)
-                                            GUI:Text([[PosY]])
-                                        GUI:NextColumn()
-                                        GUI:SetColumnWidth(-1, 100)
-                                            GUI:Text([[PosZ]])
-                                        GUI:NextColumn()
-                                        GUI:SetColumnWidth(-1, 200)
-                                            GUI:Text()
-                                        GUI:Columns(1)
-                                        
-                                        GUI:BeginChild([[##ObjectiveList]], 695, 120)
-                                            GUI:Columns(5, [[]], false)
-                                            GUI:SetColumnWidth(-1, 100)
-                                                if MashLib.Helpers.SizeOf(DungeonCreator.CurrentFile.objectivedestinations) > 0 then
-                                                    for k, v in pairs(DungeonCreator.CurrentFile.objectivedestinations) do 
-                                                            DungeonCreator.CurrentFile.objectivedestinations[k].objective = GUI:InputText([[##ObjectiveItem]] .. k, DungeonCreator.CurrentFile.objectivedestinations[k].objective)
-                                                        GUI:NextColumn()
-                                                        GUI:SetColumnWidth(-1, 100)
-                                                            DungeonCreator.CurrentFile.objectivedestinations[k].pos.x = GUI:InputText([[##ObjectivePosX]] .. k, DungeonCreator.CurrentFile.objectivedestinations[k].pos.x)
-                                                        GUI:NextColumn()
-                                                        GUI:SetColumnWidth(-1, 100)
-                                                            DungeonCreator.CurrentFile.objectivedestinations[k].pos.y = GUI:InputText([[##ObjectivePosY]] .. k, DungeonCreator.CurrentFile.objectivedestinations[k].pos.y)
-                                                        GUI:NextColumn()
-                                                        GUI:SetColumnWidth(-1, 100)
-                                                            DungeonCreator.CurrentFile.objectivedestinations[k].pos.z = GUI:InputText([[##ObjectivePosZ]] .. k, DungeonCreator.CurrentFile.objectivedestinations[k].pos.z)
-                                                        GUI:NextColumn()
-                                                        GUI:SetColumnWidth(-1, 300)
-
-                                                            local ObjectiveGetPos = GUI:Button([[Get current pos##ObjectiveGetPos]], 150, 19)
-                        
-                                                            if GUI:IsItemClicked(ObjectiveGetPos) then 
-                                                                DungeonCreator.CurrentFile.objectivedestinations[k].pos = {
-                                                                    x = MashLib.Helpers.ToFixed(Player.pos.x, 2),
-                                                                    y = MashLib.Helpers.ToFixed(Player.pos.y, 2),
-                                                                    z = MashLib.Helpers.ToFixed(Player.pos.z, 2)
-                                                                }
-                                                            end
-                        
-                                                            GUI:SameLine()
-
-                                                            local RemoveObjective = GUI:Button([[Remove##RemoveObjective]], 50, 19)
-                        
-                                                            if GUI:IsItemClicked(RemoveObjective) then 
-                                                                DungeonCreator.CurrentFile.objectivedestinations[k] = nil
-                                                            end
-
-                                                        GUI:NextColumn()
-                                                    end
                                                 end
+
+                                                GUI:SameLine()
+
+                                                local ClearObjectives = GUI:Button([[Clear##ClearObjectives]], 50, 19)
+
+                                                if GUI:IsItemClicked(ClearObjectives) then 
+                                                    DungeonCreator.CurrentFile.objectivedestinations = {}
+                                                end
+
+                                            GUI:EndChild()
+
+                                            GUI:Columns(5, [[]], false)
+                                            GUI:SetColumnWidth(-1, 80)
+                                                GUI:Text([[Order]])
+                                            GUI:NextColumn()
+                                            GUI:SetColumnWidth(-1, 70)
+                                                GUI:Text([[PosX]])
+                                            GUI:NextColumn()
+                                            GUI:SetColumnWidth(-1, 70)
+                                                GUI:Text([[PosY]])
+                                            GUI:NextColumn()
+                                            GUI:SetColumnWidth(-1, 70)
+                                                GUI:Text([[PosZ]])
+                                            GUI:NextColumn()
+                                            GUI:SetColumnWidth(-1, 200)
+                                                GUI:Text()
                                             GUI:Columns(1)
                                             
-                                        GUI:EndChild()
+                                            GUI:BeginChild([[##ObjectiveList]], 695, 120, true)
+                                                GUI:Columns(5, [[]], false)
+                                                GUI:SetColumnWidth(-1, 70)
+                                                    if MashLib.Helpers.SizeOf(DungeonCreator.CurrentFile.objectivedestinations) > 0 then
+                                                        for k, v in pairs(DungeonCreator.CurrentFile.objectivedestinations) do 
+                                                                GUI:PushItemWidth(60)
+                                                                    DungeonCreator.CurrentFile.objectivedestinations[k].objective = GUI:InputText([[##ObjectiveItem]] .. k, DungeonCreator.CurrentFile.objectivedestinations[k].objective)
+                                                                GUI:PopItemWidth()
+                                                            GUI:NextColumn()
+                                                            GUI:SetColumnWidth(-1, 70)
+                                                                GUI:PushItemWidth(60)
+                                                                    DungeonCreator.CurrentFile.objectivedestinations[k].pos.x = GUI:InputText([[##ObjectivePosX]] .. k, DungeonCreator.CurrentFile.objectivedestinations[k].pos.x)
+                                                                GUI:PopItemWidth()
+                                                            GUI:NextColumn()
+                                                            GUI:SetColumnWidth(-1, 70)
+                                                                GUI:PushItemWidth(60)
+                                                                    DungeonCreator.CurrentFile.objectivedestinations[k].pos.y = GUI:InputText([[##ObjectivePosY]] .. k, DungeonCreator.CurrentFile.objectivedestinations[k].pos.y)
+                                                                GUI:PopItemWidth()
+                                                            GUI:NextColumn()
+                                                            GUI:SetColumnWidth(-1, 70)
+                                                                GUI:PushItemWidth(60)
+                                                                    DungeonCreator.CurrentFile.objectivedestinations[k].pos.z = GUI:InputText([[##ObjectivePosZ]] .. k, DungeonCreator.CurrentFile.objectivedestinations[k].pos.z)
+                                                                GUI:PopItemWidth()
+                                                            GUI:NextColumn()
+                                                            GUI:SetColumnWidth(-1, 400)
 
-                                    GUI:Unindent()
-                                MashLib.UI.PopTitledChild()
+                                                                local ObjectiveGoToPos = GUI:Button([[Go to pos##ObjectiveGetPos]], 100, 19)
+                            
+                                                                if GUI:IsItemClicked(ObjectiveGoToPos) then 
+                                                                    if DungeonCreator.CurrentFile.objectivedestinations[k].pos then
+                                                                        MashLib.Space.MoveTo(DungeonCreator.CurrentFile.objectivedestinations[k].pos)
+                                                                    end
+                                                                end
+                            
+                                                                GUI:SameLine()
 
-                                GUI:NewLine()
+                                                                local ObjectiveGetPos = GUI:Button([[Get current pos##ObjectiveGetPos]], 150, 19)
+                            
+                                                                if GUI:IsItemClicked(ObjectiveGetPos) then 
+                                                                    DungeonCreator.CurrentFile.objectivedestinations[k].pos = {
+                                                                        x = MashLib.Helpers.ToFixed(Player.pos.x, 2),
+                                                                        y = MashLib.Helpers.ToFixed(Player.pos.y, 2),
+                                                                        z = MashLib.Helpers.ToFixed(Player.pos.z, 2)
+                                                                    }
+                                                                end
+                            
+                                                                GUI:SameLine()
+
+                                                                local RemoveObjective = GUI:Button([[Remove##RemoveObjective]], 50, 19)
+                            
+                                                                if GUI:IsItemClicked(RemoveObjective) then 
+                                                                    DungeonCreator.CurrentFile.objectivedestinations[k] = nil
+                                                                end
+
+                                                            GUI:NextColumn()
+                                                        end
+                                                    end
+                                                GUI:Columns(1)
+                                                
+                                            GUI:EndChild()
+
+                                        GUI:Unindent()
+                                    MashLib.UI.PopTitledChild()
+
+                                    GUI:NewLine()
+                                else
+                                    DungeonCreator.CurrentFile.objectivedestinations = {}
+                                end
                             end
                             
     -- ------------------------- Boss ID ------------------------
 
-                            if DungeonCreator.CurrentFile.bossids then
-                                MashLib.UI.BeginTitledChild([[ProfileBossId]], [[Bosses]], 715, 200, 0)
-                                    GUI:Indent()
+                            if (GUI:CollapsingHeader(GetString("Bosses"))) then
+                                if DungeonCreator.CurrentFile.bossids then
+                                    MashLib.UI.BeginTitledChild([[ProfileBossId]], [[Bosses]], 715, 200, 0)
+                                        GUI:Indent()
 
-                                        GUI:BeginChild([[##BossIdButtons]], 695, 30)
+                                            GUI:BeginChild([[##BossIdButtons]], 695, 30)
 
-                                            local AddTargetBossId = GUI:Button([[Add from target##AddTargetBossId]], 150, 19)
+                                                local AddTargetBossId = GUI:Button([[Add from target##AddTargetBossId]], 150, 19)
 
-                                            if GUI:IsItemClicked(AddTargetBossId) then 
-                                                if Player:GetTarget() then
-                                                    local index = #DungeonCreator.CurrentFile.bossids+1
-                                                    DungeonCreator.CurrentFile.bossids[index] = Player:GetTarget().contentId
-                                                end
-                                            end
-
-                                            GUI:SameLine()
-
-                                            local ClearBossId = GUI:Button([[Clear##ClearBossId]], 50, 19)
-
-                                            if GUI:IsItemClicked(ClearBossId) then 
-                                                DungeonCreator.CurrentFile.bossids = {}
-                                            end
-
-                                        GUI:EndChild()
-
-                                        GUI:Columns(2, [[]], false)
-                                        GUI:SetColumnWidth(-1, 100)
-                                            GUI:Text([[ContentID]])
-                                        GUI:NextColumn()
-                                        GUI:SetColumnWidth(-1, 200)
-                                            GUI:Text()
-                                        GUI:Columns(1)
-                                        
-
-                                        GUI:BeginChild([[##BossIdList]], 695, 120)
-                                            GUI:Columns(2, [[]], false)
-                                            GUI:SetColumnWidth(-1, 100)
-                                                if MashLib.Helpers.SizeOf(DungeonCreator.CurrentFile.bossids) > 0 then
-                                                    for k, v in pairs(DungeonCreator.CurrentFile.bossids) do 
-                                                            GUI:Text(v)
-                                                        GUI:NextColumn()
-                                                        GUI:SetColumnWidth(-1, 200)
-
-                                                            local RemoveBossId = GUI:Button([[Remove##RemoveBossId]], 50, 19)
-                        
-                                                            if GUI:IsItemClicked(RemoveBossId) then 
-                                                                DungeonCreator.CurrentFile.bossids[k] = nil
-                                                            end
-
-                                                        GUI:NextColumn()
+                                                if GUI:IsItemClicked(AddTargetBossId) then 
+                                                    if Player:GetTarget() then
+                                                        local index = #DungeonCreator.CurrentFile.bossids+1
+                                                        DungeonCreator.CurrentFile.bossids[index] = Player:GetTarget().contentId
                                                     end
                                                 end
-                                            GUI:Columns(1)
-                                        GUI:EndChild()
 
-                                    GUI:Unindent()
-                                MashLib.UI.PopTitledChild()
+                                                GUI:SameLine()
+
+                                                local ClearBossId = GUI:Button([[Clear##ClearBossId]], 50, 19)
+
+                                                if GUI:IsItemClicked(ClearBossId) then 
+                                                    DungeonCreator.CurrentFile.bossids = {}
+                                                end
+
+                                            GUI:EndChild()
+
+                                            GUI:Columns(2, [[]], false)
+                                            GUI:SetColumnWidth(-1, 100)
+                                                GUI:Text([[ContentID]])
+                                            GUI:NextColumn()
+                                            GUI:SetColumnWidth(-1, 200)
+                                                GUI:Text()
+                                            GUI:Columns(1)
+                                            
+
+                                            GUI:BeginChild([[##BossIdList]], 695, 120)
+                                                GUI:Columns(2, [[]], false)
+                                                GUI:SetColumnWidth(-1, 100)
+                                                    if MashLib.Helpers.SizeOf(DungeonCreator.CurrentFile.bossids) > 0 then
+                                                        for k, v in pairs(DungeonCreator.CurrentFile.bossids) do 
+                                                                GUI:Text(v)
+                                                            GUI:NextColumn()
+                                                            GUI:SetColumnWidth(-1, 200)
+
+                                                                local RemoveBossId = GUI:Button([[Remove##RemoveBossId]], 50, 19)
                             
-                                GUI:NewLine()
+                                                                if GUI:IsItemClicked(RemoveBossId) then 
+                                                                    DungeonCreator.CurrentFile.bossids[k] = nil
+                                                                end
+
+                                                            GUI:NextColumn()
+                                                        end
+                                                    end
+                                                GUI:Columns(1)
+                                            GUI:EndChild()
+
+                                        GUI:Unindent()
+                                    MashLib.UI.PopTitledChild()
+                                
+                                    GUI:NewLine()
+                                else
+                                    DungeonCreator.CurrentFile.bossids = {}
+                                end
                             end
                             
     -- ------------------------- Priority Target ------------------------
 
-                            if DungeonCreator.CurrentFile.prioritytarget then
-                                MashLib.UI.BeginTitledChild([[ProfilePriorityTarget]], [[Priority Targets]], 715, 200, 0)
-                                    GUI:Indent()
+                            if (GUI:CollapsingHeader(GetString("Priority Targets"))) then
+                                if DungeonCreator.CurrentFile.prioritytarget then
+                                    MashLib.UI.BeginTitledChild([[ProfilePriorityTarget]], [[Priority Targets]], 715, 200, 0)
+                                        GUI:Indent()
 
-                                        GUI:BeginChild([[##PriorityTargetsButtons]], 695, 30)
+                                            GUI:BeginChild([[##PriorityTargetsButtons]], 695, 30)
 
-                                            local AddPriorityTarget = GUI:Button([[Add##AddPriorityTarget]], 50, 19)
-                                            
+                                                local AddPriorityTarget = GUI:Button([[Add##AddPriorityTarget]], 50, 19)
+                                                
 
-                                            if GUI:IsItemClicked(AddPriorityTarget) then 
-                                                local index = #DungeonCreator.CurrentFile.prioritytarget+1
-
-                                                DungeonCreator.CurrentFile.prioritytarget[index] = {
-                                                    contentid = 0,
-                                                    priority = 1,
-                                                    type = ""
-                                                }
-                                            end
-                                            
-                                            GUI:SameLine()
-
-                                            local AddTargetPriorityTarget = GUI:Button([[Add from target##AddTargetPriorityTarget]], 150, 19)
-                                            
-
-                                            if GUI:IsItemClicked(AddTargetPriorityTarget) then 
-                                                if Player:GetTarget() then
+                                                if GUI:IsItemClicked(AddPriorityTarget) then 
                                                     local index = #DungeonCreator.CurrentFile.prioritytarget+1
-                                                    
+
                                                     DungeonCreator.CurrentFile.prioritytarget[index] = {
-                                                        contentid = Player:GetTarget().contentId,
+                                                        contentid = 0,
                                                         priority = 1,
-                                                        type = Player:GetTarget().name
+                                                        type = ""
                                                     }
                                                 end
-                                            end
+                                                
+                                                GUI:SameLine()
 
-                                            GUI:SameLine()
+                                                local AddTargetPriorityTarget = GUI:Button([[Add from target##AddTargetPriorityTarget]], 150, 19)
+                                                
 
-                                            local ClearPriorityTargets = GUI:Button([[Clear##ClearPriorityTargets]], 50, 19)
+                                                if GUI:IsItemClicked(AddTargetPriorityTarget) then 
+                                                    if Player:GetTarget() then
+                                                        local index = #DungeonCreator.CurrentFile.prioritytarget+1
+                                                        
+                                                        DungeonCreator.CurrentFile.prioritytarget[index] = {
+                                                            contentid = Player:GetTarget().contentId,
+                                                            priority = 1,
+                                                            type = Player:GetTarget().name
+                                                        }
+                                                    end
+                                                end
 
-                                            if GUI:IsItemClicked(ClearPriorityTargets) then 
-                                                DungeonCreator.CurrentFile.prioritytarget = {}
-                                            end
+                                                GUI:SameLine()
 
-                                        GUI:EndChild()
+                                                local ClearPriorityTargets = GUI:Button([[Clear##ClearPriorityTargets]], 50, 19)
 
-                                        GUI:Columns(4, [[]], false)
-                                        GUI:SetColumnWidth(-1, 100)
-                                            GUI:Text([[ContentId]])
-                                        GUI:NextColumn()
-                                        GUI:SetColumnWidth(-1, 100)
-                                            GUI:Text([[Priority]])
-                                        GUI:NextColumn()
-                                        GUI:SetColumnWidth(-1, 300)
-                                            GUI:Text([[Type]])
-                                        GUI:NextColumn()
-                                        GUI:SetColumnWidth(-1, 100)
-                                            GUI:Text()
-                                        GUI:Columns(1)
+                                                if GUI:IsItemClicked(ClearPriorityTargets) then 
+                                                    DungeonCreator.CurrentFile.prioritytarget = {}
+                                                end
 
-                                        GUI:BeginChild([[##PriorityTargetList]], 695, 120)
+                                            GUI:EndChild()
+
                                             GUI:Columns(4, [[]], false)
                                             GUI:SetColumnWidth(-1, 100)
-                                                if MashLib.Helpers.SizeOf(DungeonCreator.CurrentFile.prioritytarget) > 0 then
-                                                    for k, v in pairs(DungeonCreator.CurrentFile.prioritytarget) do 
-                                                            DungeonCreator.CurrentFile.prioritytarget[k].contentid = GUI:InputText([[##PriorityTargetContentId]] .. k, DungeonCreator.CurrentFile.prioritytarget[k].contentid)
+                                                GUI:Text([[ContentId]])
+                                            GUI:NextColumn()
+                                            GUI:SetColumnWidth(-1, 100)
+                                                GUI:Text([[Priority]])
+                                            GUI:NextColumn()
+                                            GUI:SetColumnWidth(-1, 300)
+                                                GUI:Text([[Type]])
+                                            GUI:NextColumn()
+                                            GUI:SetColumnWidth(-1, 100)
+                                                GUI:Text()
+                                            GUI:Columns(1)
+
+                                            GUI:BeginChild([[##PriorityTargetList]], 695, 120)
+                                                GUI:Columns(4, [[]], false)
+                                                GUI:SetColumnWidth(-1, 100)
+                                                    if MashLib.Helpers.SizeOf(DungeonCreator.CurrentFile.prioritytarget) > 0 then
+                                                        for k, v in pairs(DungeonCreator.CurrentFile.prioritytarget) do 
+                                                                DungeonCreator.CurrentFile.prioritytarget[k].contentid = GUI:InputText([[##PriorityTargetContentId]] .. k, DungeonCreator.CurrentFile.prioritytarget[k].contentid)
+                                                            GUI:NextColumn()
+                                                            GUI:SetColumnWidth(-1, 100)
+                                                                DungeonCreator.CurrentFile.prioritytarget[k].priority = GUI:InputText([[##PriorityTargetPriority]] .. k, DungeonCreator.CurrentFile.prioritytarget[k].priority)
+                                                            GUI:NextColumn()
+                                                            GUI:SetColumnWidth(-1, 300)
+                                                                GUI:PushItemWidth(290)
+                                                                    DungeonCreator.CurrentFile.prioritytarget[k].type = GUI:InputText([[##PriorityTargetType]] .. k, DungeonCreator.CurrentFile.prioritytarget[k].type)
+                                                                GUI:PopItemWidth()
+                                                            GUI:NextColumn()
+                                                            GUI:SetColumnWidth(-1, 200)
+
+                                                                local GetPriorityTargetContentIdFromTarget = GUI:Button([[Get target##GetPriorityTargetContentIdFromTarget]], 100, 19)
+
+                                                                if GUI:IsItemClicked(GetPriorityTargetContentIdFromTarget) then 
+                                                                    DungeonCreator.CurrentFile.prioritytarget[k].contentid = Player:GetTarget().contentId
+                                                                    DungeonCreator.CurrentFile.prioritytarget[k].type = Player:GetTarget().name
+                                                                end
+
+                                                                GUI:SameLine()
+
+                                                                local RemovePriorityTarget = GUI:Button([[Remove##RemovePriorityTarget]], 50, 19)
+
+                                                                if GUI:IsItemClicked(RemovePriorityTarget) then 
+                                                                    DungeonCreator.CurrentFile.prioritytarget[k] = nil
+                                                                end
+
+                                                            GUI:NextColumn()
+                                                        end
+                                                    end
+                                                GUI:Columns(1)
+                                            GUI:EndChild()
+
+                                        GUI:Unindent()
+                                    MashLib.UI.PopTitledChild()
+                                    
+                                    GUI:NewLine()
+                                else
+                                    DungeonCreator.CurrentFile.prioritytarget = {}
+                                end
+                            end
+                            
+    -- ------------------------- Interactions ------------------------
+
+                            if (GUI:CollapsingHeader(GetString("Interactions"))) then
+                                if DungeonCreator.CurrentFile.interacts then
+                                    MashLib.UI.BeginTitledChild([[ProfileInteractions]], [[Interactions]], 715, 200, 0)
+                                        GUI:Indent()
+
+                                            GUI:BeginChild([[##InteractionsButtons]], 695, 30)
+
+                                                local AddInteraction = GUI:Button([[Add##AddInteraction]], 50, 19)
+
+                                                if GUI:IsItemClicked(AddInteraction) then 
+                                                    local index = #DungeonCreator.CurrentFile.interacts+1
+                                                    
+                                                    DungeonCreator.CurrentFile.interacts[index] = {
+                                                        contentid = 0,
+                                                        priority = 1,
+                                                        type = ""
+                                                    }
+                                                end
+
+                                                GUI:SameLine()
+
+                                                local AddTargetInteraction = GUI:Button([[Add from target##AddTargetInteraction]], 150, 19)
+
+                                                if GUI:IsItemClicked(AddTargetInteraction) then 
+                                                    if Player:GetTarget() then
+                                                        local index = #DungeonCreator.CurrentFile.interacts+1
+                                                        
+                                                        DungeonCreator.CurrentFile.interacts[index] = {
+                                                            contentid = Player:GetTarget().contentId,
+                                                            priority = 1,
+                                                            type = Player:GetTarget().name
+                                                        }
+                                                    end
+                                                end
+
+                                                GUI:SameLine()
+
+                                                local ClearInteractions = GUI:Button([[Clear##ClearInteractions]], 50, 19)
+
+                                                if GUI:IsItemClicked(ClearInteractions) then 
+                                                    DungeonCreator.CurrentFile.interacts = {}
+                                                end
+
+                                            GUI:EndChild()
+
+                                            GUI:Columns(4, [[]], false)
+                                            GUI:SetColumnWidth(-1, 100)
+                                                GUI:Text([[ContentId]])
+                                            GUI:NextColumn()
+                                            GUI:SetColumnWidth(-1, 100)
+                                                GUI:Text([[Priority]])
+                                            GUI:NextColumn()
+                                            GUI:SetColumnWidth(-1, 300)
+                                                GUI:Text([[Type]])
+                                            GUI:NextColumn()
+                                            GUI:SetColumnWidth(-1, 100)
+                                                GUI:Text()
+                                            GUI:Columns(1)
+
+                                            GUI:BeginChild([[##InteractionList]], 695, 120)
+                                                GUI:Columns(4, [[]], false)
+                                                GUI:SetColumnWidth(-1, 100)
+                                                    if MashLib.Helpers.SizeOf(DungeonCreator.CurrentFile.interacts) > 0 then
+                                                        for k, v in pairs(DungeonCreator.CurrentFile.interacts) do 
+                                                            DungeonCreator.CurrentFile.interacts[k].contentid = GUI:InputText([[##InteractContentId]] .. k, DungeonCreator.CurrentFile.interacts[k].contentid)
                                                         GUI:NextColumn()
                                                         GUI:SetColumnWidth(-1, 100)
-                                                            DungeonCreator.CurrentFile.prioritytarget[k].priority = GUI:InputText([[##PriorityTargetPriority]] .. k, DungeonCreator.CurrentFile.prioritytarget[k].priority)
+                                                            DungeonCreator.CurrentFile.interacts[k].priority = GUI:InputText([[##InteractPriority]] .. k, DungeonCreator.CurrentFile.interacts[k].priority)
                                                         GUI:NextColumn()
                                                         GUI:SetColumnWidth(-1, 300)
                                                             GUI:PushItemWidth(290)
-                                                                DungeonCreator.CurrentFile.prioritytarget[k].type = GUI:InputText([[##PriorityTargetType]] .. k, DungeonCreator.CurrentFile.prioritytarget[k].type)
+                                                                DungeonCreator.CurrentFile.interacts[k].type = GUI:InputText([[##InteractType]] .. k, DungeonCreator.CurrentFile.interacts[k].type)
                                                             GUI:PopItemWidth()
                                                         GUI:NextColumn()
                                                         GUI:SetColumnWidth(-1, 200)
+                                        
+                                                            local GetInteraction = GUI:Button([[Get target##GetInteraction]], 100, 19)
 
-                                                            local GetPriorityTargetContentIdFromTarget = GUI:Button([[Get target##GetPriorityTargetContentIdFromTarget]], 100, 19)
-
-                                                            if GUI:IsItemClicked(GetPriorityTargetContentIdFromTarget) then 
-                                                                DungeonCreator.CurrentFile.prioritytarget[k].contentid = Player:GetTarget().contentId
-                                                                DungeonCreator.CurrentFile.prioritytarget[k].type = Player:GetTarget().name
+                                                            if GUI:IsItemClicked(RemoveInteraction) then 
+                                                                DungeonCreator.CurrentFile.interacts[k].contentId = Player:GetTarget().contentId
                                                             end
 
                                                             GUI:SameLine()
+                                        
+                                                            local RemoveInteraction = GUI:Button([[Remove##RemoveInteraction]], 50, 19)
 
-                                                            local RemovePriorityTarget = GUI:Button([[Remove##RemovePriorityTarget]], 50, 19)
-
-                                                            if GUI:IsItemClicked(RemovePriorityTarget) then 
-                                                                DungeonCreator.CurrentFile.prioritytarget[k] = nil
+                                                            if GUI:IsItemClicked(RemoveInteraction) then 
+                                                                DungeonCreator.CurrentFile.interacts[k] = nil
                                                             end
 
                                                         GUI:NextColumn()
                                                     end
                                                 end
-                                            GUI:Columns(1)
-                                        GUI:EndChild()
+                                                GUI:Columns(1)
+                                            GUI:EndChild()
 
-                                    GUI:Unindent()
-                                MashLib.UI.PopTitledChild()
-                                
-                                GUI:NewLine()
-                            end
-                            
-    -- ------------------------- Interactions ------------------------
-
-                            if DungeonCreator.CurrentFile.interacts then
-                                MashLib.UI.BeginTitledChild([[ProfileInteractions]], [[Interactions]], 715, 200, 0)
-                                    GUI:Indent()
-
-                                        GUI:BeginChild([[##InteractionsButtons]], 695, 30)
-
-                                            local AddInteraction = GUI:Button([[Add##AddInteraction]], 50, 19)
-
-                                            if GUI:IsItemClicked(AddInteraction) then 
-                                                local index = #DungeonCreator.CurrentFile.interacts+1
-                                                
-                                                DungeonCreator.CurrentFile.interacts[index] = {
-                                                    contentid = 0,
-                                                    priority = 1,
-                                                    type = "loot"
-                                                }
-                                            end
-
-                                            GUI:SameLine()
-
-                                            local AddTargetInteraction = GUI:Button([[Add from target##AddTargetInteraction]], 150, 19)
-
-                                            if GUI:IsItemClicked(AddTargetInteraction) then 
-                                                if Player:GetTarget() then
-                                                    local index = #DungeonCreator.CurrentFile.interacts+1
-                                                    
-                                                    DungeonCreator.CurrentFile.interacts[index] = {
-                                                        contentid = Player:GetTarget().contentId,
-                                                        priority = 1,
-                                                        type = "loot"
-                                                    }
-                                                end
-                                            end
-
-                                            GUI:SameLine()
-
-                                            local ClearInteractions = GUI:Button([[Clear##ClearInteractions]], 50, 19)
-
-                                            if GUI:IsItemClicked(ClearInteractions) then 
-                                                DungeonCreator.CurrentFile.interacts = {}
-                                            end
-
-                                        GUI:EndChild()
-
-                                        GUI:Columns(4, [[]], false)
-                                        GUI:SetColumnWidth(-1, 100)
-                                            GUI:Text([[ContentId]])
-                                        GUI:NextColumn()
-                                        GUI:SetColumnWidth(-1, 100)
-                                            GUI:Text([[Priority]])
-                                        GUI:NextColumn()
-                                        GUI:SetColumnWidth(-1, 300)
-                                            GUI:Text([[Type]])
-                                        GUI:NextColumn()
-                                        GUI:SetColumnWidth(-1, 100)
-                                            GUI:Text()
-                                        GUI:Columns(1)
-
-                                        GUI:BeginChild([[##InteractionList]], 695, 120)
-                                            GUI:Columns(4, [[]], false)
-                                            GUI:SetColumnWidth(-1, 100)
-                                                if MashLib.Helpers.SizeOf(DungeonCreator.CurrentFile.interacts) > 0 then
-                                                    for k, v in pairs(DungeonCreator.CurrentFile.interacts) do 
-                                                        DungeonCreator.CurrentFile.interacts[k].contentid = GUI:InputText([[##InteractContentId]] .. k, DungeonCreator.CurrentFile.interacts[k].contentid)
-                                                    GUI:NextColumn()
-                                                    GUI:SetColumnWidth(-1, 100)
-                                                        DungeonCreator.CurrentFile.interacts[k].priority = GUI:InputText([[##InteractPriority]] .. k, DungeonCreator.CurrentFile.interacts[k].priority)
-                                                    GUI:NextColumn()
-                                                    GUI:SetColumnWidth(-1, 300)
-                                                        GUI:PushItemWidth(290)
-                                                            DungeonCreator.CurrentFile.interacts[k].type = GUI:InputText([[##InteractType]] .. k, DungeonCreator.CurrentFile.interacts[k].type)
-                                                        GUI:PopItemWidth()
-                                                    GUI:NextColumn()
-                                                    GUI:SetColumnWidth(-1, 200)
-                                    
-                                                        local GetInteraction = GUI:Button([[Get target##GetInteraction]], 100, 19)
-
-                                                        if GUI:IsItemClicked(RemoveInteraction) then 
-                                                            DungeonCreator.CurrentFile.interacts[k].contentId = Player:GetTarget().contentId
-                                                        end
-
-                                                        GUI:SameLine()
-                                    
-                                                        local RemoveInteraction = GUI:Button([[Remove##RemoveInteraction]], 50, 19)
-
-                                                        if GUI:IsItemClicked(RemoveInteraction) then 
-                                                            DungeonCreator.CurrentFile.interacts[k] = nil
-                                                        end
-
-                                                    GUI:NextColumn()
-                                                end
-                                            end
-                                            GUI:Columns(1)
-                                        GUI:EndChild()
-
-                                    GUI:Unindent()
-                                MashLib.UI.PopTitledChild()
+                                        GUI:Unindent()
+                                    MashLib.UI.PopTitledChild()
+                                else
+                                    DungeonCreator.CurrentFile.interacts = {}
+                                end
                             end
 
     -- ------------------------- Buffs ------------------------
 
-                            -- if DungeonCreator.CurrentFile.hasbuff then
-                            --     MashLib.UI.BeginTitledChild([[ProfileHasBuffs]], [[Buffs]], 715, 200, 0)
-                            --         GUI:Indent()
+                            if (GUI:CollapsingHeader(GetString("Buff Checks"))) then
+                                if DungeonCreator.CurrentFile.hasbuff then
+                                    MashLib.UI.BeginTitledChild([[ProfileHasBuffs]], [[Buffs]], 715, 400, 0)
+                                        GUI:Indent()
 
-                            --             GUI:BeginChild([[##HasBuffsButtons]], 695, 30)
+                                            GUI:BeginChild([[##HasBuffsButtons]], 695, 30)
 
-                            --                 local AddHasBuff = GUI:Button([[Add##AddHasBuff]], 50, 19)
+                                                local AddMoveHasBuff = GUI:Button([[Add Interact##AddMoveHasBuff]], 150, 19)
 
-                            --                 if GUI:IsItemClicked(AddHasBuff) then 
+                                                if GUI:IsItemClicked(AddMoveHasBuff) then 
+                                                    DungeonCreator.CurrentFile.hasbuff[#DungeonCreator.CurrentFile.hasbuff+1] = {
+                                                        type            = "interact",
+                                                        interactid      = "",
+                                                        buffid          = 0,
+                                                        stacksrequired  = 1,
+                                                        desc            = ""
+                                                    }
+                                                end
 
-                            --                 end
+                                                GUI:SameLine()
 
-                            --                 GUI:SameLine()
+                                                local AddInteractHasBuff = GUI:Button([[Add Move##AddInteractHasBuff]], 150, 19)
 
-                            --                 local ClearHasBuffs = GUI:Button([[Clear##ClearHasBuffs]], 50, 19)
+                                                if GUI:IsItemClicked(AddInteractHasBuff) then 
+                                                    DungeonCreator.CurrentFile.hasbuff[#DungeonCreator.CurrentFile.hasbuff+1] = {
+                                                        type            = "move",
+                                                        pos             = {},
+                                                        buffid          = 0,
+                                                        desc            = ""
+                                                    }
+                                                end
 
-                            --                 if GUI:IsItemClicked(ClearHasBuffs) then 
+                                                GUI:SameLine()
 
-                            --                 end
+                                                local ClearHasBuff = GUI:Button([[Clear##ClearHasBuff]], 50, 19)
 
-                            --             GUI:EndChild()
+                                                if GUI:IsItemClicked(ClearHasBuff) then 
+                                                    DungeonCreator.CurrentFile.hasbuff = {}
+                                                end
 
-                            --             GUI:Columns(4, [[]], false)
-                            --             GUI:SetColumnWidth(-1, 100)
-                            --                 GUI:Text([[ID]])
-                            --             GUI:NextColumn()
-                            --             GUI:SetColumnWidth(-1, 100)
-                            --                 GUI:Text([[Type]])
-                            --             GUI:NextColumn()
-                            --             GUI:SetColumnWidth(-1, 300)
-                            --                 GUI:Text([[Type]])
-                            --             GUI:NextColumn()
-                            --             GUI:SetColumnWidth(-1, 100)
-                            --                 GUI:Text()
-                            --             GUI:Columns(1)
+                                            GUI:EndChild()
 
-                            --             GUI:BeginChild([[##InteractionList]], 695, 120)
-                            --                 GUI:Columns(4, [[]], false)
-                            --                 GUI:SetColumnWidth(-1, 100)
-                            --                     for k, v in ipairs(DungeonCreator.CurrentFile.prioritytarget) do 
-                            --                             DungeonCreator.CurrentFile.interacts[k].contentid = GUI:InputText([[##InteractContentId]] .. k, DungeonCreator.CurrentFile.interacts[k].contentid)
-                            --                         GUI:NextColumn()
-                            --                         GUI:SetColumnWidth(-1, 100)
-                            --                             DungeonCreator.CurrentFile.interacts[k].priority = GUI:InputText([[##InteractPriority]] .. k, DungeonCreator.CurrentFile.interacts[k].priority)
-                            --                         GUI:NextColumn()
-                            --                         GUI:SetColumnWidth(-1, 300)
-                            --                             GUI:PushItemWidth(290)
-                            --                                 DungeonCreator.CurrentFile.interacts[k].type = GUI:InputText([[##InteractType]] .. k, DungeonCreator.CurrentFile.interacts[k].type)
-                            --                             GUI:PopItemWidth()
-                            --                         GUI:NextColumn()
-                            --                         GUI:SetColumnWidth(-1, 200)
-                                    
-                            --                             local AddInteraction = GUI:Button([[Add##AddInteraction]], 50, 19)
+    -- ------------------------- Interact ------------------------
 
-                            --                             if GUI:IsItemClicked(AddInteraction) then 
+                                            MashLib.UI.BeginTitledChild([[HasBuffInteractList]], [[Interact]], 695, 100, 0)
+                                                GUI:Indent()
+                                                    GUI:Columns(5, [[]], false)
+                                                    GUI:SetColumnWidth(-1, 60)
+                                                        GUI:Text([[ID]])
+                                                    GUI:NextColumn()
+                                                    GUI:SetColumnWidth(-1, 240)
+                                                        GUI:Text([[Interact IDs]])
+                                                    GUI:NextColumn()
+                                                    GUI:SetColumnWidth(-1, 80)
+                                                        GUI:Text([[Stack]])
+                                                    GUI:NextColumn()
+                                                    GUI:SetColumnWidth(-1, 170)
+                                                        GUI:Text([[Description]])
+                                                    GUI:NextColumn()
+                                                    GUI:SetColumnWidth(-1, 100)
+                                                        GUI:Text()
+                                                    GUI:Columns(1)
 
-                            --                             end
+                                                    GUI:Columns(5, [[]], false)
+                                                    GUI:SetColumnWidth(-1, 60)
+                                                        for k, v in pairs(DungeonCreator.CurrentFile.hasbuff) do 
+                                                            if DungeonCreator.CurrentFile.hasbuff[k].type == 'interact' then
+                                                                GUI:PushItemWidth(50)
+                                                                    DungeonCreator.CurrentFile.hasbuff[k].buffid = GUI:InputText([[##HasBuffBuffId]] .. k, DungeonCreator.CurrentFile.hasbuff[k].buffid)
+                                                                GUI:PopItemWidth()
+                                                                GUI:NextColumn()
+                                                                GUI:SetColumnWidth(-1, 235)
+                                                                    GUI:PushItemWidth(215)
+                                                                        DungeonCreator.CurrentFile.hasbuff[k].interactid = GUI:InputText([[##HasBuffInteractIds]] .. k, DungeonCreator.CurrentFile.hasbuff[k].interactid)
+                                                                    GUI:PopItemWidth()
+                                                                GUI:NextColumn()
+                                                                GUI:SetColumnWidth(-1, 80)
+                                                                    GUI:PushItemWidth(50)
+                                                                        DungeonCreator.CurrentFile.hasbuff[k].stacksrequired = GUI:InputText([[##HasBuffStackReq]] .. k, DungeonCreator.CurrentFile.hasbuff[k].stacksrequired)
+                                                                    GUI:PopItemWidth()
+                                                                GUI:NextColumn()
+                                                                GUI:SetColumnWidth(-1, 180)
+                                                                    GUI:PushItemWidth(160)
+                                                                        DungeonCreator.CurrentFile.hasbuff[k].desc = GUI:InputText([[##HasBuffDescription]] .. k, DungeonCreator.CurrentFile.hasbuff[k].desc)
+                                                                    GUI:PopItemWidth()
+                                                                GUI:NextColumn()
+                                                                GUI:SetColumnWidth(-1, 200)
 
-                            --                             GUI:SameLine()
+                                                                    local RemoveHasBuff = GUI:Button([[Remove##RemoveHasBuffInteract]], 50, 19)
 
-                            --                             local ClearInteractions = GUI:Button([[Clear##ClearInteractions]], 50, 19)
+                                                                    if GUI:IsItemClicked(RemoveHasBuff) then 
+                                                                        DungeonCreator.CurrentFile.hasbuff[k] = nil
+                                                                    end
 
-                            --                             if GUI:IsItemClicked(ClearInteractions) then 
+                                                                GUI:NextColumn()
+                                                            end
+                                                        end
+                                                    GUI:Columns(1)
+                                                GUI:Unindent()
+                                            MashLib.UI.PopTitledChild()
 
-                            --                             end
+    -- ------------------------- Move ------------------------
 
-                            --                         GUI:NextColumn()
-                            --                     end
-                            --                 GUI:Columns(1)
-                            --             GUI:EndChild()
+                                            MashLib.UI.BeginTitledChild([[HasBuffMoveList]], [[Move]], 695, 200, 0)
+                                                GUI:Indent()
+                                                        for k, v in pairs(DungeonCreator.CurrentFile.hasbuff) do 
+                                                            if DungeonCreator.CurrentFile.hasbuff[k].type == 'move' then
+                                                                if not GUI:CollapsingHeader(k) then
+                                                                    local HasBuffAddPosition = GUI:Button([[Add position##HasBuffAddPosition]], 100, 19)
 
-                            --         GUI:Unindent()
-                            --     MashLib.UI.PopTitledChild()
-                            -- end
+                                                                    if GUI:IsItemClicked(HasBuffAddPosition) then 
+                                                                        DungeonCreator.CurrentFile.hasbuff[k].pos[#DungeonCreator.CurrentFile.hasbuff[k].pos+1] = {
+                                                                            x = Player.pos.x,
+                                                                            y = Player.pos.y,
+                                                                            z = Player.pos.z
+                                                                        }
+                                                                    end
 
-    -- ------------------------- Avoidance ------------------------
+                                                                    GUI:SameLine()
 
-                            -- if DungeonCreator.CurrentFile.advancedavoid then
-                            --     MashLib.UI.BeginTitledChild([[ProfileInteractions]], [[Interactions]], 715, 200, 0)
-                            --         GUI:Indent()
+                                                                    local HasBuffDeleteItem = GUI:Button([[Delete##HasBuffDeleteItem]], 100, 19)
 
-                            --             GUI:BeginChild([[##InteractionsButtons]], 695, 30)
-                            --                 local AddInteraction = GUI:Button([[Add##AddInteraction]], 50, 19)
+                                                                    if GUI:IsItemClicked(HasBuffDeleteItem) then 
+                                                                        DungeonCreator.CurrentFile.hasbuff[k] = nil
+                                                                    end
 
-                            --                 if GUI:IsItemClicked(AddInteraction) then 
+                                                                    if DungeonCreator.CurrentFile.hasbuff[k] then
+                                                                        MashLib.UI.BeginTitledChild([[HasBuffPositions]] .. k, [[Positions]], 667, 100, 0)
+                                                                            if MashLib.Helpers.SizeOf(DungeonCreator.CurrentFile.hasbuff[k].pos) > 0 then 
+                                                                                GUI:Indent()
+                                                                                    GUI:Columns(4, [[]], false)
+                                                                                    GUI:SetColumnWidth(-1, 60)
+                                                                                        GUI:Text([[X]])
+                                                                                    GUI:NextColumn()
+                                                                                    GUI:SetColumnWidth(-1, 65)
+                                                                                        GUI:Text([[Y]])
+                                                                                    GUI:NextColumn()
+                                                                                    GUI:SetColumnWidth(-1, 65)
+                                                                                        GUI:Text([[Z]])
+                                                                                    GUI:NextColumn()
+                                                                                    GUI:SetColumnWidth(-1, 300)
+                                                                                        GUI:Text()
+                                                                                    GUI:Columns(1)
 
-                            --                 end
+                                                                                    GUI:Columns(4, [[]], false)
+                                                                                    GUI:SetColumnWidth(-1, 60)
+                                                                                        for kp, vp in pairs(DungeonCreator.CurrentFile.hasbuff[k].pos) do 
+                                                                                                GUI:PushItemWidth(50)
+                                                                                                    DungeonCreator.CurrentFile.hasbuff[k].pos[kp].x = GUI:InputText([[##HasBuffMovePosX]] .. kp, DungeonCreator.CurrentFile.hasbuff[k].pos[kp].x)
+                                                                                                GUI:PopItemWidth()
+                                                                                            GUI:NextColumn()
+                                                                                            GUI:SetColumnWidth(-1, 60)
+                                                                                                GUI:PushItemWidth(50)
+                                                                                                    DungeonCreator.CurrentFile.hasbuff[k].pos[kp].y = GUI:InputText([[##HasBuffMovePosY]] .. kp, DungeonCreator.CurrentFile.hasbuff[k].pos[kp].y)
+                                                                                                GUI:PopItemWidth()
+                                                                                            GUI:NextColumn()
+                                                                                            GUI:SetColumnWidth(-1, 60)
+                                                                                                GUI:PushItemWidth(50)
+                                                                                                    DungeonCreator.CurrentFile.hasbuff[k].pos[kp].z = GUI:InputText([[##HasBuffMovePosZ]] .. kp, DungeonCreator.CurrentFile.hasbuff[k].pos[kp].z)
+                                                                                                GUI:PopItemWidth()
+                                                                                            GUI:NextColumn()
+                                                                                            GUI:SetColumnWidth(-1, 300)
 
-                            --                 GUI:SameLine()
+                                                                                                GUI:Text([[]])
+                                                                                                GUI:SameLine()
+                                
+                                                                                                local HasBuffGetPos = GUI:Button([[Get Pos##HasBuffGetPos]], 120, 19)
+                                
+                                                                                                if GUI:IsItemClicked(HasBuffGetPos) then 
+                                                                                                    DungeonCreator.CurrentFile.hasbuff[k].pos[kp] = {
+                                                                                                        x = MashLib.Helpers.ToFixed(Player.pos.x),
+                                                                                                        y = MashLib.Helpers.ToFixed(Player.pos.x),
+                                                                                                        z = MashLib.Helpers.ToFixed(Player.pos.x)
+                                                                                                    }
+                                                                                                end
 
-                            --                 local ClearInteractions = GUI:Button([[Clear##ClearInteractions]], 50, 19)
+                                                                                                GUI:SameLine()
+                                
+                                                                                                local RemoveHasBuffMove = GUI:Button([[Remove##RemoveHasBuffMove]], 120, 19)
+                                
+                                                                                                if GUI:IsItemClicked(RemoveHasBuffMove) then 
+                                                                                                    for kx, vx in pairs(DungeonCreator.CurrentFile.hasbuff[k].pos) do
+                                                                                                        if kx == kp then 
+                                                                                                            DungeonCreator.CurrentFile.hasbuff[k].pos[kx] = nil
+                                                                                                        end
+                                                                                                    end
+                                                                                                end
+                                
+                                                                                            GUI:NextColumn()
+                                                                                        end
+                                                                                        
+                                                                                    GUI:Columns(1)
+                                                                                GUI:Unindent()
+                                                                            end
+                                                                        MashLib.UI.PopTitledChild()
+                                                                    end
 
-                            --                 if GUI:IsItemClicked(ClearInteractions) then 
+                                                                    GUI:NewLine()
+                                                                end
+                                                            end
+                                                        end
+                                                GUI:Unindent()
+                                            MashLib.UI.PopTitledChild()
 
-                            --                 end
-                            --             GUI:EndChild()
-
-                            --             GUI:Columns(4, [[]], false)
-                            --             GUI:SetColumnWidth(-1, 100)
-                            --                 GUI:Text([[ContentId]])
-                            --             GUI:NextColumn()
-                            --             GUI:SetColumnWidth(-1, 100)
-                            --                 GUI:Text([[Priority]])
-                            --             GUI:NextColumn()
-                            --             GUI:SetColumnWidth(-1, 300)
-                            --                 GUI:Text([[Type]])
-                            --             GUI:NextColumn()
-                            --             GUI:SetColumnWidth(-1, 100)
-                            --                 GUI:Text()
-                            --             GUI:Columns(1)
-
-                            --             GUI:BeginChild([[##InteractionList]], 695, 120)
-                            --                 GUI:Columns(4, [[]], false)
-                            --                 GUI:SetColumnWidth(-1, 100)
-                            --                     for k, v in ipairs(DungeonCreator.CurrentFile.prioritytarget) do 
-                            --                             DungeonCreator.CurrentFile.interacts[k].contentid = GUI:InputText([[##InteractContentId]] .. k, DungeonCreator.CurrentFile.interacts[k].contentid)
-                            --                         GUI:NextColumn()
-                            --                         GUI:SetColumnWidth(-1, 100)
-                            --                             DungeonCreator.CurrentFile.interacts[k].priority = GUI:InputText([[##InteractPriority]] .. k, DungeonCreator.CurrentFile.interacts[k].priority)
-                            --                         GUI:NextColumn()
-                            --                         GUI:SetColumnWidth(-1, 300)
-                            --                             GUI:PushItemWidth(290)
-                            --                                 DungeonCreator.CurrentFile.interacts[k].type = GUI:InputText([[##InteractType]] .. k, DungeonCreator.CurrentFile.interacts[k].type)
-                            --                             GUI:PopItemWidth()
-                            --                         GUI:NextColumn()
-                            --                         GUI:SetColumnWidth(-1, 200)
-                                    
-                            --                             local AddInteraction = GUI:Button([[Add##AddInteraction]], 50, 19)
-
-                            --                             if GUI:IsItemClicked(AddInteraction) then 
-
-                            --                             end
-
-                            --                             GUI:SameLine()
-
-                            --                             local ClearInteractions = GUI:Button([[Clear##ClearInteractions]], 50, 19)
-
-                            --                             if GUI:IsItemClicked(ClearInteractions) then 
-
-                            --                             end
-
-                            --                         GUI:NextColumn()
-                            --                     end
-                            --                 GUI:Columns(1)
-                            --             GUI:EndChild()
-
-                            --         GUI:Unindent()
-                            --     MashLib.UI.PopTitledChild()
-                            -- end
-
-    -- ------------------------- Overhead Markers ------------------------
-
-                            -- if DungeonCreator.CurrentFile.overheadmarkers then
-                            --     MashLib.UI.BeginTitledChild([[ProfileInteractions]], [[Interactions]], 715, 200, 0)
-                            --         GUI:Indent()
-
-                            --             GUI:BeginChild([[##InteractionsButtons]], 695, 30)
-                            --                 local AddInteraction = GUI:Button([[Add##AddInteraction]], 50, 19)
-
-                            --                 if GUI:IsItemClicked(AddInteraction) then 
-
-                            --                 end
-
-                            --                 GUI:SameLine()
-
-                            --                 local ClearInteractions = GUI:Button([[Clear##ClearInteractions]], 50, 19)
-
-                            --                 if GUI:IsItemClicked(ClearInteractions) then 
-
-                            --                 end
-                            --             GUI:EndChild()
-
-                            --             GUI:Columns(4, [[]], false)
-                            --             GUI:SetColumnWidth(-1, 100)
-                            --                 GUI:Text([[ContentId]])
-                            --             GUI:NextColumn()
-                            --             GUI:SetColumnWidth(-1, 100)
-                            --                 GUI:Text([[Priority]])
-                            --             GUI:NextColumn()
-                            --             GUI:SetColumnWidth(-1, 300)
-                            --                 GUI:Text([[Type]])
-                            --             GUI:NextColumn()
-                            --             GUI:SetColumnWidth(-1, 100)
-                            --                 GUI:Text()
-                            --             GUI:Columns(1)
-
-                            --             GUI:BeginChild([[##InteractionList]], 695, 120)
-                            --                 GUI:Columns(4, [[]], false)
-                            --                 GUI:SetColumnWidth(-1, 100)
-                            --                     for k, v in ipairs(DungeonCreator.CurrentFile.prioritytarget) do 
-                            --                             DungeonCreator.CurrentFile.interacts[k].contentid = GUI:InputText([[##InteractContentId]] .. k, DungeonCreator.CurrentFile.interacts[k].contentid)
-                            --                         GUI:NextColumn()
-                            --                         GUI:SetColumnWidth(-1, 100)
-                            --                             DungeonCreator.CurrentFile.interacts[k].priority = GUI:InputText([[##InteractPriority]] .. k, DungeonCreator.CurrentFile.interacts[k].priority)
-                            --                         GUI:NextColumn()
-                            --                         GUI:SetColumnWidth(-1, 300)
-                            --                             GUI:PushItemWidth(290)
-                            --                                 DungeonCreator.CurrentFile.interacts[k].type = GUI:InputText([[##InteractType]] .. k, DungeonCreator.CurrentFile.interacts[k].type)
-                            --                             GUI:PopItemWidth()
-                            --                         GUI:NextColumn()
-                            --                         GUI:SetColumnWidth(-1, 200)
-                                    
-                            --                             local AddInteraction = GUI:Button([[Add##AddInteraction]], 50, 19)
-
-                            --                             if GUI:IsItemClicked(AddInteraction) then 
-
-                            --                             end
-
-                            --                             GUI:SameLine()
-
-                            --                             local ClearInteractions = GUI:Button([[Clear##ClearInteractions]], 50, 19)
-
-                            --                             if GUI:IsItemClicked(ClearInteractions) then 
-
-                            --                             end
-
-                            --                         GUI:NextColumn()
-                            --                     end
-                            --                 GUI:Columns(1)
-                            --             GUI:EndChild()
-
-                            --         GUI:Unindent()
-                            --     MashLib.UI.PopTitledChild()
-                            -- end
+                                        GUI:Unindent()
+                                    MashLib.UI.PopTitledChild()
+                                else
+                                    DungeonCreator.CurrentFile.hasbuff = {}
+                                end
+                            end
                         end
                     GUI:EndChild()
                 end
