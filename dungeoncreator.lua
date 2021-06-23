@@ -128,7 +128,7 @@ function DungeonCreator.FormatFileToFramework(File)
 
 -- ------------------------- HasBuff ------------------------
 
-    for k, v in pairs(File.hasbuff) do
+    for k, v in pairs(NewFile.hasbuff) do
         if v.type == 'interact' then
             NewFile.hasbuff[#NewFile.hasbuff+1] = {
                 type            = "interact",
@@ -159,7 +159,7 @@ function DungeonCreator.FormatFileToFramework(File)
 
 -- ------------------------- AdvancedAvoid ------------------------
 
-    for k, v in pairs(File.advancedavoid) do
+    for k, v in pairs(NewFile.advancedavoid) do
         loadstring("DungeonCreator.AdvancedAvoidTemporary = " .. v.texteditor)()
         NewFile.advancedavoid[k] = DungeonCreator.AdvancedAvoidTemporary
     end
