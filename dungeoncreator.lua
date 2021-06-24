@@ -94,75 +94,84 @@ function DungeonCreator.FormatFileToFramework(File)
     NewFile.advancedavoid           = {}
 
 -- ------------------------- Interactions ------------------------
-
-    for k, v in pairs(File.interacts) do 
-        NewFile.interacts[#NewFile.interacts+1] = {
-            contentid   = tonumber(v.contentid),
-            priority    = tonumber(v.priority),
-            type        = v.type,
-        }
-    end
+	if File.interacts ~= nil then
+		for k, v in pairs(File.interacts) do 
+			NewFile.interacts[#NewFile.interacts+1] = {
+				contentid   = tonumber(v.contentid),
+				priority    = tonumber(v.priority),
+				type        = v.type,
+			}
+		end
+	end
 
 -- ------------------------- ObjectiveDestinations ------------------------
 
-    for k, v in pairs(File.objectivedestinations) do 
-        NewFile.objectivedestinations[#NewFile.objectivedestinations+1] = {
-            objective   = tonumber(v.objective),
-            pos         = {
-                x = v.pos.x + 0.0,
-                y = v.pos.y + 0.0,
-                z = v.pos.z + 0.0,
-            }
-        }
-    end
+    if File.objectivedestinations ~= nil then
+		for k, v in pairs(File.objectivedestinations) do 
+			NewFile.objectivedestinations[#NewFile.objectivedestinations+1] = {
+				objective   = tonumber(v.objective),
+				pos         = {
+					x = v.pos.x + 0.0,
+					y = v.pos.y + 0.0,
+					z = v.pos.z + 0.0,
+				}
+			}
+		end
+	end
 
 -- ------------------------- PriorityTargets ------------------------
 
-    for k, v in pairs(File.prioritytarget) do 
-        NewFile.prioritytarget[#NewFile.prioritytarget+1] = {
-            contentid   = tonumber(v.contentid),
-            priority    = tonumber(v.priority),
-            type        = v.type
-        }
-    end
+    if File.prioritytarget ~= nil then
+		for k, v in pairs(File.prioritytarget) do 
+			NewFile.prioritytarget[#NewFile.prioritytarget+1] = {
+				contentid   = tonumber(v.contentid),
+				priority    = tonumber(v.priority),
+				type        = v.type
+			}
+		end
+	end
 
 -- ------------------------- HasBuff ------------------------
 
-    for k, v in pairs(File.hasbuff) do
-        if v.type == 'interact' then
-            NewFile.hasbuff[#NewFile.hasbuff+1] = {
-                type            = "interact",
-                interactid      = v.interactid,
-                buffid          = tonumber(v.buffid),
-                stacksrequired  = tonumber(v.stacksrequired),
-                desc            = v.desc
-            }
-        elseif v.type == 'move' then
-            local index = #NewFile.hasbuff+1
-
-            NewFile.hasbuff[index] = {
-                type            = "move",
-                buffid          = tonumber(v.buffid),
-                desc            = v.desc,
-                pos             = {}
-            }
-
-            for _, vp in pairs(v.pos) do 
-                NewFile.hasbuff[index].pos[#NewFile.hasbuff[index].pos+1] = {
-                    x = vp.x + 0.0,
-                    y = vp.y + 0.0,
-                    z = vp.z + 0.0
+    if File.hasbuff ~= nil then
+        for k, v in pairs(File.hasbuff) do
+            if v.type == 'interact' then
+                NewFile.hasbuff[#NewFile.hasbuff+1] = {
+                    type            = "interact",
+                    interactid      = v.interactid,
+                    buffid          = tonumber(v.buffid),
+                    stacksrequired  = tonumber(v.stacksrequired),
+                    desc            = v.desc
                 }
+            elseif v.type == 'move' then
+                local index = #NewFile.hasbuff+1
+
+                NewFile.hasbuff[index] = {
+                    type            = "move",
+                    buffid          = tonumber(v.buffid),
+                    desc            = v.desc,
+                    pos             = {}
+                }
+
+                for _, vp in pairs(v.pos) do 
+                    NewFile.hasbuff[index].pos[#NewFile.hasbuff[index].pos+1] = {
+                        x = vp.x + 0.0,
+                        y = vp.y + 0.0,
+                        z = vp.z + 0.0
+                    }
+                end
             end
         end
     end
 
 -- ------------------------- AdvancedAvoid ------------------------
 
-    for k, v in pairs(File.advancedavoid) do
-        loadstring("DungeonCreator.AdvancedAvoidTemporary = " .. v.texteditor)()
-        NewFile.advancedavoid[k] = DungeonCreator.AdvancedAvoidTemporary
-    end
+	if File.advancedavoid ~= nil then
+        for k, v in pairs(File.advancedavoid) do
+            loadstring("DungeonCreator.AdvancedAvoidTemporary = " .. v.texteditor)()
+            NewFile.advancedavoid[k] = DungeonCreator.AdvancedAvoidTemporary
+        end
+	end
 
     return NewFile
 end
@@ -574,7 +583,7 @@ function DungeonCreator.MainWindow()
                                                             GUI:NextColumn()
                                                             GUI:SetColumnWidth(-1, 400)
 
-                                                                local ObjectiveGoToPos = GUI:Button([[Go to pos##ObjectiveGetPos]], 100, 19)
+                                                                local ObjectiveGoToPos = GUI:Button([[Go to pos##ObjectiveGoToPos]], 100, 19)
                                                                 
                                                                 if GUI:IsItemClicked(ObjectiveGoToPos) then 
                                                                     if DungeonCreator.CurrentFile.objectivedestinations[k].pos then
@@ -584,19 +593,19 @@ function DungeonCreator.MainWindow()
 
                                                                 GUI:SameLine()
 
-                                                                local ObjectiveGetPos = GUI:Button([[Get ppos##ObjectiveGetPos]], 75, 19)
+--                                                                 local ObjectiveGetPos = GUI:Button([[Get ppos##ObjectiveGetPos]], 75, 19)
 
-                                                                if GUI:IsItemClicked(ObjectiveGetPos) then 
-                                                                    DungeonCreator.CurrentFile.objectivedestinations[k].pos = {
-                                                                        x = MashLib.Helpers.ToFixed(Player.pos.x, 2),
-                                                                        y = MashLib.Helpers.ToFixed(Player.pos.y, 2),
-                                                                        z = MashLib.Helpers.ToFixed(Player.pos.z, 2)
-                                                                    }
-                                                                end
+--                                                                 if GUI:IsItemClicked(ObjectiveGetPos) then 
+--                                                                     DungeonCreator.CurrentFile.objectivedestinations[k].pos = {
+--                                                                         x = MashLib.Helpers.ToFixed(Player.pos.x, 2),
+--                                                                         y = MashLib.Helpers.ToFixed(Player.pos.y, 2),
+--                                                                         z = MashLib.Helpers.ToFixed(Player.pos.z, 2)
+--                                                                     }
+--                                                                 end
 
-                                                                GUI:SameLine()
+--                                                                 GUI:SameLine()
                                                                 
-                                                                local ObjectiveGetTargetPos = GUI:Button([[Get tpos##ObjectiveGetTargetPos]], 75, 19)
+                                                                local ObjectiveGetTargetPos = GUI:Button([[Target or Me##ObjectiveGetTargetPos]], 150, 19)
                                                                 
                                                                 if GUI:IsItemClicked(ObjectiveGetTargetPos) then
                                                                     if Player:GetTarget() then
@@ -892,8 +901,12 @@ function DungeonCreator.MainWindow()
                                         
                                                             local GetInteraction = GUI:Button([[Get target##GetInteraction]], 100, 19)
 
-                                                            if GUI:IsItemClicked(RemoveInteraction) then 
-                                                                DungeonCreator.CurrentFile.interacts[k].contentId = Player:GetTarget().contentId
+                                                            if GUI:IsItemClicked(GetInteraction) then
+								DungeonCreator.CurrentFile.interacts[k] = {
+									contentid = Player:GetTarget().contentId,
+									priority = 1,
+									type = Player:GetTarget().name
+								}	
                                                             end
 
                                                             GUI:SameLine()
