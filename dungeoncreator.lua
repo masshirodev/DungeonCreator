@@ -94,37 +94,42 @@ function DungeonCreator.FormatFileToFramework(File)
     NewFile.advancedavoid           = {}
 
 -- ------------------------- Interactions ------------------------
-
-    for k, v in pairs(File.interacts) do 
-        NewFile.interacts[#NewFile.interacts+1] = {
-            contentid   = tonumber(v.contentid),
-            priority    = tonumber(v.priority),
-            type        = v.type,
-        }
-    end
+	if File.interacts ~= nil then
+		for k, v in pairs(File.interacts) do 
+			NewFile.interacts[#NewFile.interacts+1] = {
+				contentid   = tonumber(v.contentid),
+				priority    = tonumber(v.priority),
+				type        = v.type,
+			}
+		end
+	end
 
 -- ------------------------- ObjectiveDestinations ------------------------
 
-    for k, v in pairs(File.objectivedestinations) do 
-        NewFile.objectivedestinations[#NewFile.objectivedestinations+1] = {
-            objective   = tonumber(v.objective),
-            pos         = {
-                x = v.pos.x + 0.0,
-                y = v.pos.y + 0.0,
-                z = v.pos.z + 0.0,
-            }
-        }
-    end
+    if File.objectivedestinations ~= nil then
+		for k, v in pairs(File.objectivedestinations) do 
+			NewFile.objectivedestinations[#NewFile.objectivedestinations+1] = {
+				objective   = tonumber(v.objective),
+				pos         = {
+					x = v.pos.x + 0.0,
+					y = v.pos.y + 0.0,
+					z = v.pos.z + 0.0,
+				}
+			}
+		end
+	end
 
 -- ------------------------- PriorityTargets ------------------------
 
-    for k, v in pairs(File.prioritytarget) do 
-        NewFile.prioritytarget[#NewFile.prioritytarget+1] = {
-            contentid   = tonumber(v.contentid),
-            priority    = tonumber(v.priority),
-            type        = v.type
-        }
-    end
+    if File.prioritytarget ~= nil then
+		for k, v in pairs(File.prioritytarget) do 
+			NewFile.prioritytarget[#NewFile.prioritytarget+1] = {
+				contentid   = tonumber(v.contentid),
+				priority    = tonumber(v.priority),
+				type        = v.type
+			}
+		end
+	end
 
 -- ------------------------- HasBuff ------------------------
 
