@@ -128,44 +128,44 @@ function DungeonCreator.FormatFileToFramework(File)
 
 -- ------------------------- HasBuff ------------------------
 
-	if File.hasbuff ~= nil then
-		for k, v in pairs(File.hasbuff) do
-			if v.type == 'interact' then
-				NewFile.hasbuff[#NewFile.hasbuff+1] = {
-					type            = "interact",
-					interactid      = v.interactid,
-					buffid          = tonumber(v.buffid),
-					stacksrequired  = tonumber(v.stacksrequired),
-					desc            = v.desc
-				}
-			elseif v.type == 'move' then
-				local index = #NewFile.hasbuff+1
+    if File.hasbuff ~= nil then
+        for k, v in pairs(File.hasbuff) do
+            if v.type == 'interact' then
+                NewFile.hasbuff[#NewFile.hasbuff+1] = {
+                    type            = "interact",
+                    interactid      = v.interactid,
+                    buffid          = tonumber(v.buffid),
+                    stacksrequired  = tonumber(v.stacksrequired),
+                    desc            = v.desc
+                }
+            elseif v.type == 'move' then
+                local index = #NewFile.hasbuff+1
 
-				NewFile.hasbuff[index] = {
-					type            = "move",
-					buffid          = tonumber(v.buffid),
-					desc            = v.desc,
-					pos             = {}
-				}
+                NewFile.hasbuff[index] = {
+                    type            = "move",
+                    buffid          = tonumber(v.buffid),
+                    desc            = v.desc,
+                    pos             = {}
+                }
 
-				for _, vp in pairs(v.pos) do 
-					NewFile.hasbuff[index].pos[#NewFile.hasbuff[index].pos+1] = {
-						x = vp.x + 0.0,
-						y = vp.y + 0.0,
-						z = vp.z + 0.0
-					}
-				end
-			end
-		end
-	end
+                for _, vp in pairs(v.pos) do 
+                    NewFile.hasbuff[index].pos[#NewFile.hasbuff[index].pos+1] = {
+                        x = vp.x + 0.0,
+                        y = vp.y + 0.0,
+                        z = vp.z + 0.0
+                    }
+                end
+            end
+        end
+    end
 
 -- ------------------------- AdvancedAvoid ------------------------
 
 	if File.advancedavoid ~= nil then
-		for k, v in pairs(File.advancedavoid) do
-			loadstring("DungeonCreator.AdvancedAvoidTemporary = " .. v.texteditor)()
-			NewFile.advancedavoid[k] = DungeonCreator.AdvancedAvoidTemporary
-		end
+        for k, v in pairs(File.advancedavoid) do
+            loadstring("DungeonCreator.AdvancedAvoidTemporary = " .. v.texteditor)()
+            NewFile.advancedavoid[k] = DungeonCreator.AdvancedAvoidTemporary
+        end
 	end
 
     return NewFile
