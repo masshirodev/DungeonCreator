@@ -97,60 +97,103 @@ function DungeonCreator.FormatFileToFramework(File)
 
 -- ------------------------- Interactions ------------------------
 
-    for k, v in pairs(File.interacts) do 
-        NewFile.interacts[#NewFile.interacts+1] = {
-            contentid   = tonumber(v.contentid),
-            priority    = tonumber(v.priority),
-            type        = v.type,
-        }
+    if File.interacts ~= nil then
+        for k, v in pairs(File.interacts) do 
+            NewFile.interacts[#NewFile.interacts+1] = {
+                contentid   = tonumber(v.contentid),
+                priority    = tonumber(v.priority),
+                type        = v.type,
+            }
+        end
     end
 
 -- ------------------------- ObjectiveDestinations ------------------------
 
-    for k, v in pairs(File.objectivedestinations) do 
-        NewFile.objectivedestinations[#NewFile.objectivedestinations+1] = {
-            objective   = tonumber(v.objective),
-            pos         = {
-                x = v.pos.x + 0.0,
-                y = v.pos.y + 0.0,
-                z = v.pos.z + 0.0,
+    if File.objectivedestinations ~= nil then
+        for k, v in pairs(File.objectivedestinations) do 
+            NewFile.objectivedestinations[#NewFile.objectivedestinations+1] = {
+                objective   = tonumber(v.objective),
+                pos         = {
+                    x = v.pos.x + 0.0,
+                    y = v.pos.y + 0.0,
+                    z = v.pos.z + 0.0,
+                }
             }
-        }
+        end
     end
 
 -- ------------------------- PriorityTargets ------------------------
 
-    for k, v in pairs(File.prioritytarget) do 
-        NewFile.prioritytarget[#NewFile.prioritytarget+1] = {
-            contentid   = tonumber(v.contentid),
-            priority    = tonumber(v.priority),
-            type        = v.type
-        }
+    if File.prioritytarget ~= nil then
+        for k, v in pairs(File.prioritytarget) do 
+            NewFile.prioritytarget[#NewFile.prioritytarget+1] = {
+                contentid   = tonumber(v.contentid),
+                priority    = tonumber(v.priority),
+                type        = v.type
+            }
+        end
     end
 
 -- ------------------------- HasBuff ------------------------
 
-    for k, v in pairs(File.hasbuff) do
-        if v.type == 'interact' then
-            NewFile.hasbuff[#NewFile.hasbuff+1] = {
-                type            = "interact",
-                interactid      = v.interactid,
-                buffid          = tonumber(v.buffid),
-                stacksrequired  = tonumber(v.stacksrequired),
-                desc            = v.desc
-            }
-        elseif v.type == 'move' then
-            local index = #NewFile.hasbuff+1
+    if File.hasbuff ~= nil then
+        for k, v in pairs(File.hasbuff) do
+            if v.type == 'interact' then
+                NewFile.hasbuff[#NewFile.hasbuff+1] = {
+                    type            = "interact",
+                    interactid      = v.interactid,
+                    buffid          = tonumber(v.buffid),
+                    stacksrequired  = tonumber(v.stacksrequired),
+                    desc            = v.desc
+                }
+            elseif v.type == 'move' then
+                local index = #NewFile.hasbuff+1
 
-            NewFile.hasbuff[index] = {
-                type            = "move",
-                buffid          = tonumber(v.buffid),
-                desc            = v.desc,
-                pos             = {}
+                NewFile.hasbuff[index] = {
+                    type            = "move",
+                    buffid          = tonumber(v.buffid),
+                    desc            = v.desc,
+                    pos             = {}
+                }
+
+                for _, vp in pairs(v.pos) do 
+                    NewFile.hasbuff[index].pos[#NewFile.hasbuff[index].pos+1] = {
+                        x = vp.x + 0.0,
+                        y = vp.y + 0.0,
+                        z = vp.z + 0.0
+                    }
+                end
+            end
+        end
+    end
+
+-- ------------------------- AdvancedAvoid ------------------------
+
+    if File.advancedavoid ~= nil then
+        for k, v in pairs(File.advancedavoid) do
+            loadstring("DungeonCreator.AdvancedAvoidTemporary = " .. v.texteditor)()
+            NewFile.advancedavoid[k] = DungeonCreator.AdvancedAvoidTemporary
+        end
+    end
+
+-- ------------------------- OverheadMarkers ------------------------
+
+    if File.overheadmarkers ~= nil then
+        for k, v in pairs(File.overheadmarkers) do
+            local index = #NewFile.overheadmarkers+1
+
+            NewFile.overheadmarkers[index] = {
+                id              = tonumber(v.id), 
+                contentid       = tonumber(v.contentd),
+                desc            = v.desc, 
+                type            = v.type, 
+                detectwho       = v.detectwho, 
+                pos             = {}, 
+                timetoreturn    = tonumber(v.timetoreturn)
             }
 
             for _, vp in pairs(v.pos) do 
-                NewFile.hasbuff[index].pos[#NewFile.hasbuff[index].pos+1] = {
+                NewFile.overheadmarkers[index].pos[#NewFile.overheadmarkers[index].pos+1] = {
                     x = vp.x + 0.0,
                     y = vp.y + 0.0,
                     z = vp.z + 0.0
@@ -159,44 +202,15 @@ function DungeonCreator.FormatFileToFramework(File)
         end
     end
 
--- ------------------------- AdvancedAvoid ------------------------
-
-    for k, v in pairs(File.advancedavoid) do
-        loadstring("DungeonCreator.AdvancedAvoidTemporary = " .. v.texteditor)()
-        NewFile.advancedavoid[k] = DungeonCreator.AdvancedAvoidTemporary
-    end
-
--- ------------------------- OverheadMarkers ------------------------
-
-    for k, v in pairs(File.overheadmarkers) do
-        local index = #NewFile.overheadmarkers+1
-
-        NewFile.overheadmarkers[index] = {
-            id              = tonumber(v.id), 
-            contentid       = tonumber(v.contentd),
-            desc            = v.desc, 
-            type            = v.type, 
-            detectwho       = v.detectwho, 
-            pos             = {}, 
-            timetoreturn    = tonumber(v.timetoreturn)
-        }
-
-        for _, vp in pairs(v.pos) do 
-            NewFile.overheadmarkers[index].pos[#NewFile.overheadmarkers[index].pos+1] = {
-                x = vp.x + 0.0,
-                y = vp.y + 0.0,
-                z = vp.z + 0.0
-            }
-        end
-    end
-
 -- ------------------------- FinalDestination ------------------------
 
-    NewFile.finaldestination = {
-        x = File.finaldestination.x + 0.0,
-        y = File.finaldestination.y + 0.0,
-        z = File.finaldestination.z + 0.0
-    }
+    if File.finaldestination ~= nil then
+        NewFile.finaldestination = {
+            x = File.finaldestination.x + 0.0,
+            y = File.finaldestination.y + 0.0,
+            z = File.finaldestination.z + 0.0
+        }
+    end
 
     return NewFile
 end
