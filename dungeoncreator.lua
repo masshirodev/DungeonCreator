@@ -10,7 +10,7 @@ self.Info = {
     Author      = "Mash#3428",
     AddonName   = "DungeonCreator",
     ClassName   = "DungeonCreator",
-	Version     = 104,
+	Version     = 105,
 	StartDate   = "21-06-2021",
 	LastUpdate  = "25-06-2021",
     Description = "Kitanoi's Dungeon Framework assist addon that can be used to create new dungeon profiles with ease.",
@@ -20,6 +20,7 @@ self.Info = {
         [102] = { Version = [[1.0.2]], Description = "Adding Advanced Avoidance." },
         [103] = { Version = [[1.0.3]], Description = "Adding Overhead Markers." },
         [104] = { Version = [[1.0.4]], Description = "Adding Author info and create/update date." },
+        [105] = { Version = [[1.0.5]], Description = "Adding pullenemyoutofpuddle, interactdistance, requeuetimer, excludeavoid, prioritytargetdistance and type." },
     }
 }
 
