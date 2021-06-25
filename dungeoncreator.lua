@@ -10,14 +10,16 @@ self.Info = {
     Author      = "Mash#3428",
     AddonName   = "DungeonCreator",
     ClassName   = "DungeonCreator",
-	Version     = 102,
+	Version     = 104,
 	StartDate   = "21-06-2021",
-	LastUpdate  = "23-06-2021",
+	LastUpdate  = "25-06-2021",
     Description = "Kitanoi's Dungeon Framework assist addon that can be used to create new dungeon profiles with ease.",
     ChangeLog = {
         [100] = { Version = [[1.0.0]], Description = "Starting development" },
         [101] = { Version = [[1.0.1]], Description = "Reparsing file on save to format numeric values." },
         [102] = { Version = [[1.0.2]], Description = "Adding Advanced Avoidance." },
+        [103] = { Version = [[1.0.3]], Description = "Adding Overhead Markers." },
+        [104] = { Version = [[1.0.4]], Description = "Adding Author info and create/update date." },
     }
 }
 
@@ -244,7 +246,7 @@ function DungeonCreator.MainWindow()
     if self.GUI.Open then
         local flags = GUI.WindowFlags_NoResize
         GUI:SetNextWindowSize(self.GUI.Width, self.GUI.Height, GUI.SetCond_Always)
-        self.GUI.Visible, self.GUI.Open = GUI:Begin("DungeonCreator", self.GUI.Open, flags)
+        self.GUI.Visible, self.GUI.Open = GUI:Begin([[DungeonCreator v]] .. self.Info.ChangeLog[self.Info.Version].Version, self.GUI.Open, flags)
         
             if FolderExists(DungeonCreator.ProfilePath) then
                 MashLib.UI.BeginTitledChild([[Header]], [[Profiles]], 740, 45, 0)
@@ -457,7 +459,7 @@ function DungeonCreator.MainWindow()
 
                                 GUI:SameLine()
 
-                                GUI:Text([[ ]] .. DungeonCreator.CurrentFile.createdate or [[]])
+                                GUI:Text([[ ]] .. (DungeonCreator.CurrentFile.createdate and DungeonCreator.CurrentFile.createdate or [[]]))
 
                                 if GUI:IsItemHovered() then
                                     GUI:BeginTooltip()
@@ -473,7 +475,7 @@ function DungeonCreator.MainWindow()
 
                                 GUI:SameLine()
 
-                                GUI:Text([[ ]] .. DungeonCreator.CurrentFile.lastupdate or [[]])
+                                GUI:Text([[ ]] .. (DungeonCreator.CurrentFile.lastupdate and DungeonCreator.CurrentFile.lastupdate or [[]]))
 
                                 if GUI:IsItemHovered() then
                                     GUI:BeginTooltip()
