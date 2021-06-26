@@ -142,8 +142,8 @@ function DungeonCreator.FormatFileToFramework(File)
     NewFile.hasbuff                 = {}
     NewFile.advancedavoid           = {}
     NewFile.overheadmarkers         = {}
-    NewFile.forcemeleerange         = MashLib.Helpers.SplitString(File.forcemeleerange, [[,]], [[number]])
-    NewFile.excludeavoid            = MashLib.Helpers.SplitString(File.excludeavoid, [[,]], [[number]])
+    NewFile.forcemeleerange         = MashLib.Helpers.SplitString(tostring(File.forcemeleerange), [[,]], [[number]])
+    NewFile.excludeavoid            = MashLib.Helpers.SplitString(tostring(File.excludeavoid), [[,]], [[number]])
 
 -- ------------------------- DateTime ------------------------
 
