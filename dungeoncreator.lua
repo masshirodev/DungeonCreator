@@ -252,7 +252,7 @@ function DungeonCreator.FormatFileToFramework(File)
 
             NewFile.overheadmarkers[index] = {
                 id              = tonumber(v.id), 
-                contentid       = tonumber(v.contentd),
+                contentid       = tonumber(v.contentid),
                 desc            = v.desc, 
                 type            = v.type, 
                 detectwho       = v.detectwho, 
