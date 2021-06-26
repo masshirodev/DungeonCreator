@@ -322,7 +322,7 @@ function DungeonCreator.MainWindow()
                             local FilePath = DungeonCreator.ProfilePath .. DungeonCreator.ProfileList[DungeonCreator.GUI.Combos.Profile]
 
                             if FileExists(FilePath) then
-                                MashLib.IRT.FormatFileToFramework(DungeonCreator.CurrentFile)
+                                DungeonCreator.FormatFileToFramework(DungeonCreator.CurrentFile)
                                 DungeonCreator.ProfileLoaded[DungeonCreator.GUI.Combos.Profile] = FileLoad(FilePath)
                             end
                         end
