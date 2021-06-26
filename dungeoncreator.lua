@@ -10,7 +10,7 @@ self.Info = {
     Author      = "Mash#3428",
     AddonName   = "DungeonCreator",
     ClassName   = "DungeonCreator",
-	Version     = 105,
+	Version     = 106,
 	StartDate   = "21-06-2021",
 	LastUpdate  = "25-06-2021",
     Description = "Kitanoi's Dungeon Framework assist addon that can be used to create new dungeon profiles with ease.",
@@ -21,6 +21,7 @@ self.Info = {
         [103] = { Version = [[1.0.3]], Description = "Adding Overhead Markers." },
         [104] = { Version = [[1.0.4]], Description = "Adding Author info and create/update date." },
         [105] = { Version = [[1.0.5]], Description = "Adding pullenemyoutofpuddle, interactdistance, requeuetimer, excludeavoid, prioritytargetdistance and type." },
+        [106] = { Version = [[1.0.6]], Description = "Changing ternary operations." },
     }
 }
 
@@ -52,11 +53,20 @@ self.ProfileList        = {}
 self.ProfileLoaded      = {}
 self.CurrentFile        = {}
 self.CreatingProfile    = false
+self.EntitiesRecorded   = {}
+self.EntityIndex        = 0
 self.DutyType           = {
     [1] = "Story",
     [2] = "Trust",
-    [3] = "Duty"
+    [3] = "Duty",
+    [4] = "Squadron"
 }
+
+-- ------------------------- Log ------------------------
+
+function DungeonCreator.Log(string) 
+    d("==== [DungeonCreator] - " .. tostring(string))
+end
 
 -- ------------------------- Table stringify ------------------------
 
@@ -508,7 +518,7 @@ function DungeonCreator.MainWindow()
                                 end
 
                                 GUI:PushItemWidth(100)
-                                    DungeonCreator.CurrentFile.type, _ = GUI:Combo([[##FileDutyType]], DungeonCreator.CurrentFile.type or 1, DungeonCreator.DutyType)
+                                    DungeonCreator.CurrentFile.type, _ = GUI:Combo([[##FileDutyType]], DungeonCreator.CurrentFile.type and DungeonCreator.CurrentFile.type or 1, DungeonCreator.DutyType)
                                 GUI:PopItemWidth()
                             GUI:NextColumn()
                                 GUI:Text([[Queue Type]])
@@ -519,7 +529,7 @@ function DungeonCreator.MainWindow()
                                 }
                                 
                                 GUI:PushItemWidth(100)
-                                    DungeonCreator.CurrentFile.queuetype, _ = GUI:Combo([[##FileQueueType]], DungeonCreator.CurrentFile.queuetype or 2, QueueTypes)
+                                    DungeonCreator.CurrentFile.queuetype, _ = GUI:Combo([[##FileQueueType]], DungeonCreator.CurrentFile.queuetype and DungeonCreator.CurrentFile.queuetype or 2, QueueTypes)
                                 GUI:PopItemWidth()
                             GUI:NextColumn()
                                 GUI:Text([[Duty ID]])
@@ -534,7 +544,7 @@ function DungeonCreator.MainWindow()
                                 GUI:SameLine()
 
                                 GUI:PushItemWidth(50)
-                                    DungeonCreator.CurrentFile.dutyid = GUI:InputText([[##FileDutyId]], DungeonCreator.CurrentFile.dutyid or [[]])
+                                    DungeonCreator.CurrentFile.dutyid = GUI:InputText([[##FileDutyId]], DungeonCreator.CurrentFile.dutyid and DungeonCreator.CurrentFile.dutyid or [[]])
                                 GUI:PopItemWidth()
                             GUI:NextColumn()
                                 GUI:Text([[Mesh]])
@@ -549,7 +559,7 @@ function DungeonCreator.MainWindow()
 
                                     GUI:SameLine()
 
-                                    DungeonCreator.CurrentFile.mesh = GUI:InputText([[##FileMesh]], DungeonCreator.CurrentFile.mesh or [[]])
+                                    DungeonCreator.CurrentFile.mesh = GUI:InputText([[##FileMesh]], DungeonCreator.CurrentFile.mesh and DungeonCreator.CurrentFile.mesh or [[]])
                                     
                                 GUI:PopItemWidth()
                             GUI:Columns(1)
@@ -583,31 +593,31 @@ function DungeonCreator.MainWindow()
                                         GUI:NextColumn()
                                         GUI:SetColumnWidth(-1, 600)
                                             GUI:PushItemWidth(100)
-                                                DungeonCreator.CurrentFile.enemytargetdistance = GUI:InputInt([[##FileEnemyTargetDistance]], DungeonCreator.CurrentFile.enemytargetdistance or 30)
+                                                DungeonCreator.CurrentFile.enemytargetdistance = GUI:InputInt([[##FileEnemyTargetDistance]], DungeonCreator.CurrentFile.enemytargetdistance and DungeonCreator.CurrentFile.enemytargetdistance or 30)
                                             GUI:PopItemWidth()
                                         GUI:NextColumn()
                                             GUI:Text([[Interaction Distance]])
                                         GUI:NextColumn()
                                             GUI:PushItemWidth(100)
-                                                DungeonCreator.CurrentFile.interactdistance, _ = GUI:InputInt([[##FileInteractionDistance]], DungeonCreator.CurrentFile.interactdistance or 30)
+                                                DungeonCreator.CurrentFile.interactdistance, _ = GUI:InputInt([[##FileInteractionDistance]], DungeonCreator.CurrentFile.interactdistance and DungeonCreator.CurrentFile.interactdistance or 30)
                                             GUI:PopItemWidth()
                                         GUI:NextColumn()
                                             GUI:Text([[Requeue Timer]])
                                         GUI:NextColumn()
                                             GUI:PushItemWidth(100)
-                                                DungeonCreator.CurrentFile.requeuetimer, _ = GUI:InputInt([[##FileRequeueTimer]], DungeonCreator.CurrentFile.requeuetimer or 10)
+                                                DungeonCreator.CurrentFile.requeuetimer, _ = GUI:InputInt([[##FileRequeueTimer]], DungeonCreator.CurrentFile.requeuetimer and DungeonCreator.CurrentFile.requeuetimer or 10)
                                             GUI:PopItemWidth()
                                         GUI:NextColumn()
                                             GUI:Text([[Priority Target Distance]])
                                         GUI:NextColumn()
                                             GUI:PushItemWidth(100)
-                                                DungeonCreator.CurrentFile.prioritytargetdistance, _ = GUI:InputInt([[##FilePriorityTargetDistance]], DungeonCreator.CurrentFile.prioritytargetdistance or 10)
+                                                DungeonCreator.CurrentFile.prioritytargetdistance, _ = GUI:InputInt([[##FilePriorityTargetDistance]], DungeonCreator.CurrentFile.prioritytargetdistance and DungeonCreator.CurrentFile.prioritytargetdistance or 10)
                                             GUI:PopItemWidth()
                                         GUI:NextColumn()
                                             GUI:Text([[Exclude Avoiding]])
                                         GUI:NextColumn()
                                             GUI:PushItemWidth(300)
-                                                DungeonCreator.CurrentFile.excludeavoid, _ = GUI:InputText([[##FileExcludeAvoid]], DungeonCreator.CurrentFile.excludeavoid or [[]])
+                                                DungeonCreator.CurrentFile.excludeavoid, _ = GUI:InputText([[##FileExcludeAvoid]], DungeonCreator.CurrentFile.excludeavoid and DungeonCreator.CurrentFile.excludeavoid or [[]])
                                             GUI:PopItemWidth()
 
                                             if GUI:IsItemHovered(DungeonCreator.CurrentFile.excludeavoid) then
@@ -652,9 +662,9 @@ function DungeonCreator.MainWindow()
                                             end
 
                                         GUI:NextColumn()
-                                            DungeonCreator.CurrentFile.forcemeleerange = GUI:Checkbox(GetString([[Force melee range]]), DungeonCreator.CurrentFile.forcemeleerange or false)
+                                            DungeonCreator.CurrentFile.forcemeleerange = GUI:Checkbox(GetString([[Force melee range]]), DungeonCreator.CurrentFile.forcemeleerange and DungeonCreator.CurrentFile.forcemeleerange or false)
                                         GUI:NextColumn()
-                                            DungeonCreator.CurrentFile.pullenemyoutofpuddle = GUI:Checkbox(GetString([[Pull enemies out of puddles]]), DungeonCreator.CurrentFile.pullenemyoutofpuddle or false)
+                                            DungeonCreator.CurrentFile.pullenemyoutofpuddle = GUI:Checkbox(GetString([[Pull enemies out of puddles]]), DungeonCreator.CurrentFile.pullenemyoutofpuddle and DungeonCreator.CurrentFile.pullenemyoutofpuddle or false)
                                         GUI:Columns(1)
                                     GUI:Unindent()
 
@@ -1048,14 +1058,14 @@ function DungeonCreator.MainWindow()
                                                 GUI:SetColumnWidth(-1, 100)
                                                     if MashLib.Helpers.SizeOf(DungeonCreator.CurrentFile.interacts) > 0 then
                                                         for k, v in pairs(DungeonCreator.CurrentFile.interacts) do 
-                                                            DungeonCreator.CurrentFile.interacts[k].contentid = GUI:InputText([[##InteractContentId]] .. k, DungeonCreator.CurrentFile.interacts[k].contentid or [[0]])
+                                                            DungeonCreator.CurrentFile.interacts[k].contentid = GUI:InputText([[##InteractContentId]] .. k, DungeonCreator.CurrentFile.interacts[k].contentid and DungeonCreator.CurrentFile.interacts[k].contentid or [[0]])
                                                         GUI:NextColumn()
                                                         GUI:SetColumnWidth(-1, 100)
-                                                            DungeonCreator.CurrentFile.interacts[k].priority = GUI:InputText([[##InteractPriority]] .. k, DungeonCreator.CurrentFile.interacts[k].priority or [[1]])
+                                                            DungeonCreator.CurrentFile.interacts[k].priority = GUI:InputText([[##InteractPriority]] .. k, DungeonCreator.CurrentFile.interacts[k].priority and DungeonCreator.CurrentFile.interacts[k].priority or [[1]])
                                                         GUI:NextColumn()
                                                         GUI:SetColumnWidth(-1, 300)
                                                             GUI:PushItemWidth(290)
-                                                                DungeonCreator.CurrentFile.interacts[k].type = GUI:InputText([[##InteractType]] .. k, DungeonCreator.CurrentFile.interacts[k].type or [[]])
+                                                                DungeonCreator.CurrentFile.interacts[k].type = GUI:InputText([[##InteractType]] .. k, DungeonCreator.CurrentFile.interacts[k].type and DungeonCreator.CurrentFile.interacts[k].type or [[]])
                                                             GUI:PopItemWidth()
                                                         GUI:NextColumn()
                                                         GUI:SetColumnWidth(-1, 200)
@@ -1441,7 +1451,6 @@ function DungeonCreator.MainWindow()
                                 end
                             end
                             
-
 -- ------------------------- Overhead Markers ------------------------
 
                             if (GUI:CollapsingHeader(GetString("Overhead Markers"))) then
@@ -1486,7 +1495,7 @@ function DungeonCreator.MainWindow()
                                                                 GUI:SameLine()
 
                                                                 GUI:PushItemWidth(110)
-                                                                    DungeonCreator.CurrentFile.overheadmarkers[k].contentid = GUI:InputText([[##OverHeadMarkerId]] .. k, DungeonCreator.CurrentFile.overheadmarkers[k].contentid or k)
+                                                                    DungeonCreator.CurrentFile.overheadmarkers[k].contentid = GUI:InputText([[##OverHeadMarkerId]] .. k, DungeonCreator.CurrentFile.overheadmarkers[k].contentid and DungeonCreator.CurrentFile.overheadmarkers[k].contentid or k)
                                                                 GUI:PopItemWidth()
 
                                                                 GUI:SameLine()
@@ -1496,7 +1505,7 @@ function DungeonCreator.MainWindow()
                                                                 GUI:SameLine()
 
                                                                 GUI:PushItemWidth(110)
-                                                                    DungeonCreator.CurrentFile.overheadmarkers[k].type = GUI:InputText([[##OverHeadMarkerType]] .. k, DungeonCreator.CurrentFile.overheadmarkers[k].type or [[]])
+                                                                    DungeonCreator.CurrentFile.overheadmarkers[k].type = GUI:InputText([[##OverHeadMarkerType]] .. k, DungeonCreator.CurrentFile.overheadmarkers[k].type and DungeonCreator.CurrentFile.overheadmarkers[k].type or [[]])
                                                                 GUI:PopItemWidth()
 
                                                                 GUI:SameLine()
@@ -1506,7 +1515,7 @@ function DungeonCreator.MainWindow()
                                                                 GUI:SameLine()
 
                                                                 GUI:PushItemWidth(110)
-                                                                    DungeonCreator.CurrentFile.overheadmarkers[k].detectwho = GUI:InputText([[##OverHeadMarkerDetectWho]] .. k, DungeonCreator.CurrentFile.overheadmarkers[k].detectwho or [[]])
+                                                                    DungeonCreator.CurrentFile.overheadmarkers[k].detectwho = GUI:InputText([[##OverHeadMarkerDetectWho]] .. k, DungeonCreator.CurrentFile.overheadmarkers[k].detectwho and DungeonCreator.CurrentFile.overheadmarkers[k].detectwho or [[]])
                                                                 GUI:PopItemWidth()
 
                                                                 if GUI:IsItemHovered(DungeonCreator.CurrentFile.overheadmarkers[k].detectwho) then
@@ -1522,7 +1531,7 @@ function DungeonCreator.MainWindow()
                                                                 GUI:SameLine()
 
                                                                 GUI:PushItemWidth(85)
-                                                                    DungeonCreator.CurrentFile.overheadmarkers[k].timetoreturn = GUI:InputText([[##OverHeadMarkerTimeToReturn]] .. k, DungeonCreator.CurrentFile.overheadmarkers[k].timetoreturn or [[]])
+                                                                    DungeonCreator.CurrentFile.overheadmarkers[k].timetoreturn = GUI:InputText([[##OverHeadMarkerTimeToReturn]] .. k, DungeonCreator.CurrentFile.overheadmarkers[k].timetoreturn and DungeonCreator.CurrentFile.overheadmarkers[k].timetoreturn or [[]])
                                                                 GUI:PopItemWidth()
 
                                                                 if GUI:IsItemHovered(DungeonCreator.CurrentFile.overheadmarkers[k].timetoreturn) then
@@ -1536,7 +1545,7 @@ function DungeonCreator.MainWindow()
                                                                 GUI:SameLine()
 
                                                                 GUI:PushItemWidth(605)
-                                                                    DungeonCreator.CurrentFile.overheadmarkers[k].desc = GUI:InputText([[##OverHeadMarkerDescription]] .. k, DungeonCreator.CurrentFile.overheadmarkers[k].desc or [[]])
+                                                                    DungeonCreator.CurrentFile.overheadmarkers[k].desc = GUI:InputText([[##OverHeadMarkerDescription]] .. k, DungeonCreator.CurrentFile.overheadmarkers[k].desc and DungeonCreator.CurrentFile.overheadmarkers[k].desc or [[]])
                                                                 GUI:PopItemWidth()
 
                                                                 local AddPosOverheadMarker = GUI:Button([[Add position##AddPosOverheadMarker]] .. k, 150, 19)
@@ -1551,9 +1560,9 @@ function DungeonCreator.MainWindow()
 
                                                                 GUI:SameLine()
 
-                                                                local RemoveOverheadMarker = GUI:Button([[Clear positions##RemoveOverheadMarker]] .. k, 150, 19)
+                                                                local ClearOverheadMarkerPos = GUI:Button([[Clear positions##ClearOverheadMarkerPos]] .. k, 150, 19)
 
-                                                                if GUI:IsItemClicked(RemoveOverheadMarker) then 
+                                                                if GUI:IsItemClicked(ClearOverheadMarkerPos) then 
                                                                     DungeonCreator.CurrentFile.overheadmarkers[k].pos = {}
                                                                 end
 
@@ -1588,17 +1597,17 @@ function DungeonCreator.MainWindow()
                                                                                     GUI:Columns(4, [[##OverheadMarkerListItem]] .. kp, true)
                                                                                     GUI:SetColumnWidth(-1, 100)
                                                                                         GUI:PushItemWidth(90)
-                                                                                            DungeonCreator.CurrentFile.overheadmarkers[k].pos[kp].x = GUI:InputFloat([[##OverHeadMarkerPosX]] .. k, DungeonCreator.CurrentFile.overheadmarkers[k].pos[kp].x or 0)
+                                                                                            DungeonCreator.CurrentFile.overheadmarkers[k].pos[kp].x = GUI:InputFloat([[##OverHeadMarkerPosX]] .. k, DungeonCreator.CurrentFile.overheadmarkers[k].pos[kp].x and DungeonCreator.CurrentFile.overheadmarkers[k].pos[kp].x or 0)
                                                                                         GUI:PopItemWidth()
                                                                                     GUI:NextColumn()
                                                                                     GUI:SetColumnWidth(-1, 100)
                                                                                         GUI:PushItemWidth(90)
-                                                                                            DungeonCreator.CurrentFile.overheadmarkers[k].pos[kp].y = GUI:InputFloat([[##OverHeadMarkerPosY]] .. k, DungeonCreator.CurrentFile.overheadmarkers[k].pos[kp].y or 0)
+                                                                                            DungeonCreator.CurrentFile.overheadmarkers[k].pos[kp].y = GUI:InputFloat([[##OverHeadMarkerPosY]] .. k, DungeonCreator.CurrentFile.overheadmarkers[k].pos[kp].y and DungeonCreator.CurrentFile.overheadmarkers[k].pos[kp].y or 0)
                                                                                         GUI:PopItemWidth()
                                                                                     GUI:NextColumn()
                                                                                     GUI:SetColumnWidth(-1, 100)
                                                                                         GUI:PushItemWidth(90)
-                                                                                            DungeonCreator.CurrentFile.overheadmarkers[k].pos[kp].z = GUI:InputFloat([[##OverHeadMarkerPosZ]] .. k, DungeonCreator.CurrentFile.overheadmarkers[k].pos[kp].z or 0)
+                                                                                            DungeonCreator.CurrentFile.overheadmarkers[k].pos[kp].z = GUI:InputFloat([[##OverHeadMarkerPosZ]] .. k, DungeonCreator.CurrentFile.overheadmarkers[k].pos[kp].z and DungeonCreator.CurrentFile.overheadmarkers[k].pos[kp].z or 0)
                                                                                         GUI:PopItemWidth()
                                                                                     GUI:NextColumn()
                                                                                     GUI:SetColumnWidth(-1, 500)
@@ -1648,6 +1657,12 @@ function DungeonCreator.MainWindow()
             end
 
         GUI:End()
+        
+        -- local flags = GUI.WindowFlags_NoResize
+        -- GUI:SetNextWindowSize(400, 500, GUI.SetCond_Always)
+        -- GUI:Begin([[CastHelper]], true, flags)
+        --     MashLib.IRT.CastHelper()
+        -- GUI:End()
     end
 end
 
