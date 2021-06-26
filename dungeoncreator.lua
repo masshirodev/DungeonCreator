@@ -142,8 +142,8 @@ function DungeonCreator.FormatFileToFramework(File)
     NewFile.hasbuff                 = {}
     NewFile.advancedavoid           = {}
     NewFile.overheadmarkers         = {}
-    NewFile.forcemeleerange         = MashLib.Helpers.SplitString(File.forcemeleerange, [[,]], [[number]])
-    NewFile.excludeavoid            = MashLib.Helpers.SplitString(File.excludeavoid, [[,]], [[number]])
+    NewFile.forcemeleerange         = MashLib.Helpers.SplitString(tostring(File.forcemeleerange), [[,]], [[number]])
+    NewFile.excludeavoid            = MashLib.Helpers.SplitString(tostring(File.excludeavoid), [[,]], [[number]])
 
 -- ------------------------- DateTime ------------------------
 
@@ -1635,9 +1635,9 @@ function DungeonCreator.MainWindow()
 
                                                         if GUI:IsItemClicked(AddPosOverheadMarker) then 
                                                             DungeonCreator.CurrentFile.overheadmarkers[k].pos[#DungeonCreator.CurrentFile.overheadmarkers[k].pos+1] = {
-                                                                x = 0,
-                                                                y = 0,
-                                                                z = 0   
+                                                                x = Player.pos.x,
+                                                                y = Player.pos.y,
+                                                                z = Player.pos.z   
                                                             }
                                                         end
 
