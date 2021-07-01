@@ -10,9 +10,9 @@ self.Info = {
     Author      = "Mash#3428",
     AddonName   = "DungeonCreator",
     ClassName   = "DungeonCreator",
-	Version     = 108,
+	Version     = 109,
 	StartDate   = "21-06-2021",
-	LastUpdate  = "26-06-2021",
+	LastUpdate  = "30-06-2021",
     Description = "Kitanoi's Dungeon Framework assist addon that can be used to create new dungeon profiles with ease.",
     ChangeLog = {
         [100] = { Version = [[1.0.0]], Description = "Starting development" },
@@ -24,6 +24,7 @@ self.Info = {
         [106] = { Version = [[1.0.6]], Description = "Changing ternary operations." },
         [107] = { Version = [[1.0.7]], Description = "Adding a check for invalid profiles." },
         [108] = { Version = [[1.0.8]], Description = "Changing excludeavoid and forcemeleerange datatypes." },
+        [109] = { Version = [[1.0.9]], Description = "Adding cast helper window, sidebar and trust data." },
     }
 }
 
