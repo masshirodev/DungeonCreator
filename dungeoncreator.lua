@@ -1431,8 +1431,8 @@ function DungeonCreator.MainWindow()
                                                                                 if GUI:IsItemClicked(HasBuffGetPos) then 
                                                                                     DungeonCreator.CurrentFile.hasbuff[k].pos[kp] = {
                                                                                         x = Player.pos.x,
-                                                                                        y = Player.pos.x,
-                                                                                        z = Player.pos.x
+                                                                                        y = Player.pos.y,
+                                                                                        z = Player.pos.z
                                                                                     }
                                                                                 end
 
