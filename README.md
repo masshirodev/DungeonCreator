@@ -5,3 +5,4 @@ Kitanoi's Dungeon Framework assist addon that can be used to create new dungeon 
 ## Dependencies
 
   * MashLib
+  * Argus

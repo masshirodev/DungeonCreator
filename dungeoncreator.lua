@@ -315,13 +315,12 @@ end
 
 function DungeonCreator.Init()
     local ModuleTable = self.GUI
-    ml_gui.ui_mgr:AddSubMember({
+    ml_gui.ui_mgr:AddMember({
         id      = "DungeonCreator",
         name    = "DungeonCreator",
         onClick = function() ModuleTable.OnClick() end,
         tooltip = "Kitanoi's DungeonFramework assist addon",
-        texture = MashLib.ImagePath .. [[profiles-icon.png]]
-    }, [[FFXIVMINION##MENU_HEADER]], [[MASHSTUFF##MENU_HEADER]])
+    }, [[FFXIVMINION##MENU_HEADER]])
 end
 
 -- ------------------------- MainWindow ------------------------
