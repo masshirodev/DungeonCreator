@@ -10,7 +10,7 @@ self.Info = {
     Author      = "Mash#3428",
     AddonName   = "DungeonCreator",
     ClassName   = "DungeonCreator",
-	Version     = 109,
+	Version     = 110,
 	StartDate   = "21-06-2021",
 	LastUpdate  = "30-06-2021",
     Description = "Kitanoi's Dungeon Framework assist addon that can be used to create new dungeon profiles with ease.",
@@ -25,6 +25,7 @@ self.Info = {
         [107] = { Version = [[1.0.7]], Description = "Adding a check for invalid profiles." },
         [108] = { Version = [[1.0.8]], Description = "Changing excludeavoid and forcemeleerange datatypes." },
         [109] = { Version = [[1.0.9]], Description = "Adding cast helper window, sidebar and trust data." },
+		[110] = { Version = [[1.0.9b]], Description = "Ugly edits to Mash addon from Rinn, i put my dirty fingers everywhere xD ." },
     }
 }
 
@@ -77,6 +78,7 @@ self.DefaultProfile     = {
     objectivedestinations = {},	
     bossids = {},
     interacts = {},
+	incombatinteract = {},
     creator = '',
     forcemeleerange = {},
     pullenemyoutofpuddle = false,
@@ -166,6 +168,7 @@ function DungeonCreator.FormatFileToFramework(File)
     NewFile.type                    = string.lower(DungeonCreator.DutyType[File.type])
     NewFile.trustdata               = nil
     NewFile.interacts               = {}
+	NewFile.incombatinteract        = {}
     NewFile.objectivedestinations   = {}
     NewFile.prioritytarget          = {}
     NewFile.hasbuff                 = {}
@@ -199,8 +202,22 @@ function DungeonCreator.FormatFileToFramework(File)
         }
     end
 
--- ------------------------- Interactions ------------------------
+-- ------------------------- ICI ------------------------
 
+    if File.incombatinteract ~= nil then
+        for k, v in pairs(File.incombatinteract) do 
+            NewFile.incombatinteract[#NewFile.incombatinteract+1] = {
+                interactid	= tonumber(v.interactid),
+				who		    = v.who,
+				desc		= v.desc,
+                type       	= "interact",
+				
+            }
+        end
+    end
+	
+-- ------------------------- Interactions ------------------------
+	
     if File.interacts ~= nil then
         for k, v in pairs(File.interacts) do 
             NewFile.interacts[#NewFile.interacts+1] = {
@@ -210,6 +227,7 @@ function DungeonCreator.FormatFileToFramework(File)
             }
         end
     end
+	
 
 -- ------------------------- ObjectiveDestinations ------------------------
 
@@ -1143,6 +1161,116 @@ function DungeonCreator.MainWindow()
                                 end
                             end
                             
+-- ------------------------- Incombatinteract ------------------------							
+
+                            if (GUI:CollapsingHeader(GetString("ICIs"))) then
+                                if DungeonCreator.CurrentFile.incombatinteract then
+                                    MashLib.UI.BeginTitledChild([[ProfileICIs]], [[ICIs]], 715, 200, 0)
+                                        GUI:BeginChild([[##ICIsButtons]], 695, 30)
+
+                                            local AddICI = GUI:Button([[Add##AddICI]], 50, 19)
+
+                                            if GUI:IsItemClicked(AddICI) then 
+                                                local index = #DungeonCreator.CurrentFile.incombatinteract+1
+                                                
+                                                DungeonCreator.CurrentFile.incombatinteract[index] = {
+                                                    interactid = 0,
+                                                    who = "closest",
+													desc = "",
+                                                    type = "interact",
+                                                }
+                                            end
+
+                                            GUI:SameLine()
+
+                                            local AddTargetICI = GUI:Button([[Add from target##AddTargetICI]], 150, 19)
+
+                                            if GUI:IsItemClicked(AddTargetICI) then 
+                                                if Player:GetTarget() then
+                                                    local index = #DungeonCreator.CurrentFile.incombatinteract+1
+                                                    
+                                                    DungeonCreator.CurrentFile.incombatinteract[index] = {
+                                                        interactid = Player:GetTarget().contentId,
+                                                        who = "closest",
+                                                        desc = Player:GetTarget().name,
+														type = "interact",
+                                                    }
+                                                end
+                                            end
+
+                                            GUI:SameLine()
+
+                                            local ClearICIs = GUI:Button([[Clear##ClearICIs]], 50, 19)
+
+                                            if GUI:IsItemClicked(ClearICIs) then 
+                                                DungeonCreator.CurrentFile.incombatinteract = {}
+                                            end
+
+                                        GUI:EndChild()
+
+                                        GUI:Columns(4, [[]], false)
+                                        GUI:SetColumnWidth(-1, 100)
+                                            GUI:Text([[Interactid]])
+                                        GUI:NextColumn()
+                                        GUI:SetColumnWidth(-1, 100)
+                                            GUI:Text([[Who]])
+                                        GUI:NextColumn()
+                                        GUI:SetColumnWidth(-1, 300)
+                                            GUI:Text([[Desc]])
+                                        GUI:NextColumn()
+                                        GUI:SetColumnWidth(-1, 100)
+                                            GUI:Text()
+                                        GUI:Columns(1)
+
+                                        GUI:BeginChild([[##ICIList]], 695, 120)
+                                            GUI:Columns(4, [[]], false)
+                                            GUI:SetColumnWidth(-1, 100)
+                                                if MashLib.Helpers.SizeOf(DungeonCreator.CurrentFile.incombatinteract) > 0 then
+                                                    for k, v in pairs(DungeonCreator.CurrentFile.incombatinteract) do 
+                                                        DungeonCreator.CurrentFile.incombatinteract[k].interactid = GUI:InputText([[##ICIInteractId]] .. k, DungeonCreator.CurrentFile.incombatinteract[k].interactid and DungeonCreator.CurrentFile.incombatinteract[k].interactid or [[0]])
+                                                    GUI:NextColumn()
+                                                    GUI:SetColumnWidth(-1, 100)
+                                                        DungeonCreator.CurrentFile.incombatinteract[k].who = GUI:InputText([[##ICIWho]] .. k, DungeonCreator.CurrentFile.incombatinteract[k].who and DungeonCreator.CurrentFile.incombatinteract[k].who or [[1]])
+                                                    GUI:NextColumn()
+                                                    GUI:SetColumnWidth(-1, 300)
+                                                        GUI:PushItemWidth(290)
+                                                            DungeonCreator.CurrentFile.incombatinteract[k].desc = GUI:InputText([[##ICIDesc]] .. k, DungeonCreator.CurrentFile.incombatinteract[k].desc and DungeonCreator.CurrentFile.incombatinteract[k].desc or [[]])
+                                                        GUI:PopItemWidth()
+                                                    GUI:NextColumn()
+                                                    GUI:SetColumnWidth(-1, 200)
+                                    
+                                                        local GetICI = GUI:Button([[Get target##GetICI]], 100, 19)
+
+                                                        if GUI:IsItemClicked(GetICI) then
+                                                            DungeonCreator.CurrentFile.incombatinteract[k] = {
+                                                                interactid = Player:GetTarget().contentId,
+                                                                who = "closest",
+                                                                desc = Player:GetTarget().name,
+																type = "interact",
+                                                            }
+                                                        end
+
+                                                        GUI:SameLine()
+                                    
+                                                        local RemoveICI = GUI:Button([[Remove##RemoveICI]], 50, 19)
+
+                                                        if GUI:IsItemClicked(RemoveICI) then 
+                                                            DungeonCreator.CurrentFile.incombatinteract[k] = nil
+                                                        end
+
+                                                    GUI:NextColumn()
+                                                end
+                                            end
+                                            GUI:Columns(1)
+                                        GUI:EndChild()
+
+                                    MashLib.UI.PopTitledChild()
+                                    GUI:NewLine()
+                                else
+                                    DungeonCreator.CurrentFile.incombatinteract = {}
+                                end
+                            end
+							
 -- ------------------------- Interactions ------------------------
 
                             if (GUI:CollapsingHeader(GetString("Interactions"))) then
