@@ -25,7 +25,7 @@ self.Info = {
         [107] = { Version = [[1.0.7]], Description = "Adding a check for invalid profiles." },
         [108] = { Version = [[1.0.8]], Description = "Changing excludeavoid and forcemeleerange datatypes." },
         [109] = { Version = [[1.0.9]], Description = "Adding cast helper window, sidebar and trust data." },
-		[110] = { Version = [[1.0.9b]], Description = "Ugly edits to Mash addon from Rinn, i put my dirty fingers everywhere xD ." },
+        [110] = { Version = [[1.0.9b]], Description = "Ugly edits to Mash addon from Rinn, i put my dirty fingers everywhere xD ." },
     }
 }
 
@@ -78,7 +78,7 @@ self.DefaultProfile     = {
     objectivedestinations = {},	
     bossids = {},
     interacts = {},
-	incombatinteract = {},
+    incombatinteract = {},
     creator = '',
     forcemeleerange = {},
     pullenemyoutofpuddle = false,
@@ -168,7 +168,7 @@ function DungeonCreator.FormatFileToFramework(File)
     NewFile.type                    = string.lower(DungeonCreator.DutyType[File.type])
     NewFile.trustdata               = nil
     NewFile.interacts               = {}
-	NewFile.incombatinteract        = {}
+    NewFile.incombatinteract        = {}
     NewFile.objectivedestinations   = {}
     NewFile.prioritytarget          = {}
     NewFile.hasbuff                 = {}
@@ -208,10 +208,9 @@ function DungeonCreator.FormatFileToFramework(File)
         for k, v in pairs(File.incombatinteract) do 
             NewFile.incombatinteract[#NewFile.incombatinteract+1] = {
                 interactid	= tonumber(v.interactid),
-				who		    = v.who,
-				desc		= v.desc,
-                type       	= "interact",
-				
+                who		= v.who,
+                desc		= v.desc,
+                type       	= "interact",	
             }
         end
     end
@@ -1176,7 +1175,7 @@ function DungeonCreator.MainWindow()
                                                 DungeonCreator.CurrentFile.incombatinteract[index] = {
                                                     interactid = 0,
                                                     who = "closest",
-													desc = "",
+                                                    desc = "",
                                                     type = "interact",
                                                 }
                                             end
@@ -1193,7 +1192,7 @@ function DungeonCreator.MainWindow()
                                                         interactid = Player:GetTarget().contentId,
                                                         who = "closest",
                                                         desc = Player:GetTarget().name,
-														type = "interact",
+                                                        type = "interact",
                                                     }
                                                 end
                                             end
@@ -1246,7 +1245,7 @@ function DungeonCreator.MainWindow()
                                                                 interactid = Player:GetTarget().contentId,
                                                                 who = "closest",
                                                                 desc = Player:GetTarget().name,
-																type = "interact",
+                                                                type = "interact",
                                                             }
                                                         end
 
