@@ -94,27 +94,7 @@ self.DefaultProfile     = {
 
 -- ------------------------- Enemy Cast Recorder ------------------------
 
-if Argus then
-    Argus.registerOnEntityCast(
-        function(entityID, actionID)
-            local entity = MGetEntity(entityID)
-            
-            if entity and entity.type ~= 1 and entity.chartype ~= 9 and entity.aggressive and ActionList:Get(1)[actionID].name ~= "Attack" then
-                if not DungeonCreator.EntitiesRecorded[entity.name] then
-                    DungeonCreator.EntitiesRecorded[entity.name] = {
-                        Info = entity,
-                        Actions = {}
-                    }
-                end
-                
-                if not DungeonCreator.EntitiesRecorded[entity.name].Actions[actionID] then
-                    DungeonCreator.EntitiesRecorded[entity.name].Actions[actionID] = ActionList:Get(1)[actionID].name and ActionList:Get(1)[actionID].name or [[]]
-                    DungeonCreator.Log([[Added ]] .. ActionList:Get(1)[actionID].name .. [[ to the list of actions of ]] .. entity.name)
-                end
-            end 
-        end
-    )
-end
+
 
 -- ------------------------- Log ------------------------
 
@@ -339,6 +319,28 @@ function DungeonCreator.Init()
         onClick = function() ModuleTable.OnClick() end,
         tooltip = "Kitanoi's DungeonFramework assist addon",
     }, [[FFXIVMINION##MENU_HEADER]])
+	
+	if Argus then
+		Argus.registerOnEntityCast(
+			function(entityID, actionID)
+				local entity = MGetEntity(entityID)
+				
+				if entity and entity.type ~= 1 and entity.chartype ~= 9 and entity.aggressive and ActionList:Get(1)[actionID].name ~= "Attack" then
+					if not DungeonCreator.EntitiesRecorded[entity.name] then
+						DungeonCreator.EntitiesRecorded[entity.name] = {
+							Info = entity,
+							Actions = {}
+						}
+					end
+					
+					if not DungeonCreator.EntitiesRecorded[entity.name].Actions[actionID] then
+						DungeonCreator.EntitiesRecorded[entity.name].Actions[actionID] = ActionList:Get(1)[actionID].name and ActionList:Get(1)[actionID].name or [[]]
+						DungeonCreator.Log([[Added ]] .. ActionList:Get(1)[actionID].name .. [[ to the list of actions of ]] .. entity.name)
+					end
+				end 
+			end
+		)
+	end	
 end
 
 -- ------------------------- MainWindow ------------------------
